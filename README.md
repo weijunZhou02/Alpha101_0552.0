@@ -184,7 +184,35 @@ Reshuffling the daily results in 30-day blocks gives 2,000 paths of 2,036 days e
 | G3 | The edge is weaker in calm markets | Market volatility 77% and 73% in the bad periods vs 92% in Train | First a fact check inside Train: do calmer months earn less? This matters for (j): volatility targeting makes the book *bigger* in calm markets, which this guess says is the wrong way |
 | G4 | Fees cause the bleed when there is no edge | 5.5 bp a day in every period | Stage 1 (trade less), already planned |
 
-### Stages 1-4: draft plan (to be finished and approved after stage 0)
+### Owner's decision (2026-10-27): judge before costs from now on
+
+- **All comparisons from now on use the before-cost line**: no fees and no funding, the grey dashed line on the chart.
+- **Every table still shows turnover**, so we can see if a version wins only because it trades more.
+- **Stage 0's tables above are after costs.** Its periods came from the after-cost line. That line made Bad 2 eleven months long, covering months where the signal was fine. As a result, it hid a sharp failure from 2025-10 to 2026-01.
+
+### Stage 0b: post-mortem on the before-cost line (declared 2026-10-27)
+
+Describes only. Nothing is tested or chosen. The script `stage0b.py` writes its tables to `results/stage0b/`.
+
+**Periods**, from the before-cost drawdowns of the original backtest:
+
+| Name | Trade days | Before-cost drawdown |
+| --- | --- | --- |
+| Train | 2021-03-29 to 2023-12-31 | Normal life |
+| Box 1 | 2024-01-02 to 2024-10-17 | −23.7% (peak 2024-01-01) |
+| Box 2 | 2025-10-01 to 2026-01-23 | The 10 October crash (−12.5%), then −21.4% from 2025-11-09 |
+| Dip 3 | 2026-04-24 to 2026-06-07 | −16.9% (peak 2026-04-23), not circled by the owner; information |
+| Other | 2024-01-01 to 2026-10-24, outside the three above | The rest of 2024-2026 |
+
+**Measured**, all before costs:
+1. Long and short side (each against the market average), rank IC and turnover.
+2. **New: did the whole ranking flip, or only the two ends?** For each period, the average next-day return (against the market) of the 5 groups of 16 coins, from best score to worst.
+3. Which coins: volatility, liquidity and age groups, and the biggest losers.
+4. Market conditions.
+5. The 20 worst days before costs.
+6. How unusual: the worst 12 months inside Train, and how deep before-cost drawdowns get when Train's days are reshuffled in 30-day blocks.
+
+### Stages 1-4: draft plan (written before the owner chose to ignore costs; to be redone after stage 0b)
 
 Each stage is compared with the best version so far, starting from (a), today's version.
 
