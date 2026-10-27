@@ -62,6 +62,7 @@ mkdir -p data && cp ../A101_055-main/data/*.csv.gz data/
 | `make_helpers.py` | Exports the two helper alphas from the main Alpha-mining project to `data/helpers.csv.gz` (run with the main project's Python) |
 | `experiment.py` | Stage 1: tests each change against today's version (writes `results/stage1/`) |
 | `cost_scenarios.py` | Today's version re-priced under Binance fees (writes `results/costs/`) |
+| `stage0c.py` | Stage 0c: why the bad windows happened (writes `results/stage0c/`) |
 | `baseline/` | The original backtest's summary, daily results, a live list, and data checksums |
 | `results/` | Tables from each stage (kept in git) |
 
@@ -421,6 +422,87 @@ Turnover is 79% of equity a day, so **each 1 bp of cost per dollar traded costs 
 - **2024 loses money in every scenario.**
 - Limit-order fill rates cannot be simulated with daily candles, so only paper or demo trading can show whether the maker rows are reachable.
 - These are backtest numbers. 2021-2023 flatters the alpha, because it was picked on those years.
+
+### Stage 0c: why the bad windows happened (2026-10-27, describes only)
+
+`stage0c.py` works before costs, on the original daily lists. Its tables are in `results/stage0c/`.
+
+**How the strategy trades**
+
+```mermaid
+flowchart TD
+    A["Every day after 00:00 UTC: the 80 coins with the highest 30-day trading volume"] --> B["For each coin: where is today's close inside its 12-day high-low range? 0 = at the low, 1 = at the high. Rank it among the 80"]
+    A --> C["For each coin: today's trading volume, ranked among the 80"]
+    B --> D["Over the last 6 days: do the two ranks move together? (correlation)"]
+    C --> D
+    D --> E["Score = minus that correlation"]
+    E --> F["Lowest 16 scores = SHORT: price climbs in its range on loud days and slips on quiet days ('loud pump')"]
+    E --> G["Highest 16 scores = BUY: price rises on quiet days, or falls on loud days (selling that is running out)"]
+    F --> H["Half the money long, half short, equal money per coin; hold 1 day, then repeat"]
+    G --> H
+```
+
+The bet: **loud pumps fade, and quiet coins catch up.**
+
+**What the data shows**
+
+1. **After being shorted, the coins normally keep fading for 10 days.** In the bad windows they kept running instead.
+
+   | Shorted coins vs market, next k days (bp) | 1 day | 3 days | 5 days | 10 days |
+   | --- | --- | --- | --- | --- |
+   | Train | −13 | −29 | −36 | −52 |
+   | Box 1 | +10 | +18 | +25 | +2 |
+   | Box 2 | +16 | −1 | −28 | −70 |
+   | Dip 3 | +51 | +102 | +133 | +113 |
+   | Rest of 2024-2026 | −27 | −38 | −57 | −140 |
+
+   - In Box 2 the shorts were right over 5-10 days but wrong on day 1. The BUY coins kept falling (−49 bp over 10 days) in a falling altcoin market.
+   - In Dip 3 the shorted coins kept rising for 10 days.
+
+2. **Examples** (days a coin sat on the SHORT list inside the window):
+
+   | Window | Coin | Days shorted | Coin on those days | Market on those days | Biggest day |
+   | --- | --- | --- | --- | --- | --- |
+   | Box 1 | SUI | 75 (Jan-Oct 2024) | **+306%** | +30% | +38% on 2024-08-08 |
+   | Box 1 | BONK | 79 (Feb-Oct 2024) | **+523%** | +68% | +29% on 2024-02-28 |
+   | Box 1 | ENS | 73 (Jan-Sep 2024) | +118% | +5% | +37% on 2024-01-11 |
+   | Box 2 | FHE | 13 (Dec 2025-Jan 2026) | **+284%** | −10% | +99% on 2025-12-14 |
+   | Dip 3 | LAB | 8 (May-Jun 2026) | **+496%** | +10% | +75% on 2026-05-01 |
+   | Dip 3 | BEAT | 9 (May-Jun 2026) | +196% | −7% | +47% on 2026-06-07 |
+
+   These were long, story-driven runs (the SUI ecosystem and memecoins in 2024; newly listed hype coins in 2025-2026). The strategy shorted them again and again because each push came with heavy volume.
+
+3. **It is not a market-wide "reversal stopped working" problem.**
+   - A101_055's daily results correlate only 0.10 with a plain 1-day reversal strategy.
+   - In Box 2, plain 1-day reversal made +12.5 bp/day while A101_055 lost 14.3.
+   - The market's "reversal mode" (do yesterday's winners lose today?) was the same in bad and good windows. In Train, its last 30 days did not predict A101_055's next 30 days (correlation 0.04).
+
+4. **14-day momentum made money in all three bad windows.** It made +2.5, +12.8 and +9.2 bp/day, against about 0 in Train and +17 in the rest of 2024-2026. Its daily correlation with A101_055 is −0.20 in Train.
+
+5. **A bad month does not predict another bad month.** In Train, months are slightly negatively correlated (−0.22). The month after a losing month averaged 12.7 bp/day, against 9.8 after a winning month. So "switch off after losses" rules hurt, which is why the brake (k) failed.
+
+6. **Crowded shorts were not the price problem.** Shorts already paying heavy funding fell more than, or about as much as, other shorts in every period. Funding is a cost problem, not a squeeze-risk signal here.
+
+**What research says, and what our data says about each idea**
+
+| Paper | Main point | For A101_055 |
+| --- | --- | --- |
+| [Campbell, Grossman & Wang (1993)](https://dash.harvard.edu/bitstream/1/3128710/2/campbell_trading.pdf) | Price moves on high volume from liquidity (non-information) trading tend to reverse | Why A101_055 works normally |
+| [Llorente, Michaely, Saar & Wang (2002)](https://img.nber.org/papers/w8312) | High-volume moves reverse when trading is hedging or liquidity-driven, but **continue when trading is speculative or informed** | Why it fails: story-driven runs (SUI, BONK, FHE, LAB) are speculative, so they continue |
+| [Zaremba et al. (2021)](https://ideas.repec.org/a/eee/finana/v78y2021ics1057521921002349.html) | Crypto daily reversal comes from illiquid coins; the largest, most liquid coins show momentum | Supports treating liquid and illiquid coins differently |
+| [Size and volume in crypto momentum and reversal (2023)](https://wp.ffu.vse.cz/artkey/wps-202301-0003_impact-of-size-and-volume-on-cryptocurrency-momentum-and-reversal.php) | Weekly reversal only for small, illiquid coins; momentum for large, liquid ones | Same |
+| [Daniel & Moskowitz (2016)](https://www.nber.org/papers/w20439) | Momentum crashes are partly forecastable; sizing by forecast mean and variance doubles the Sharpe | General idea: forecast danger, then size down |
+| [Barroso & Santa-Clara](https://run.unl.pt/bitstream/10362/11836/1/Barroso_2012.pdf); [Moreira & Muir](https://conference.nber.org/conf_papers/f88104/f88104.pdf) | Scale a strategy by its own recent volatility | Not tested yet. Out-of-sample results in later work are mixed |
+| [Nagel (2012)](https://www.nber.org/papers/w17653) | Reversal profits are pay for providing liquidity and are highest in turbulent times | Our check: market reversal strength does not predict A101_055. **Ruled out** |
+| [Ehsani & Linnainmaa](https://rodneywhitecenter.wharton.upenn.edu/wp-content/uploads/2020/02/EhsaniLinnainmaa_TimeSeriesEfficientFactors_Dec2019.pdf) | Factor returns are positively autocorrelated, so you can time them by past returns | Our check: A101_055's months are negatively autocorrelated in Train. **Ruled out** |
+| [Asness, Moskowitz & Pedersen (2013)](https://pages.stern.nyu.edu/~lpederse/papers/ValMomEverywhere.pdf) | Value and momentum are negatively correlated, and combined they beat either one | Supports adding a momentum book (finding 4) |
+| [Liu & Tsyvinski (2018)](https://www.nber.org/system/files/working_papers/w24877/w24877.pdf) | Strong time-series momentum in crypto; investor attention predicts returns | Attention-driven runs continue |
+
+**Ideas worth testing next, each with support in the data or the papers**
+1. **Trend guard:** don't short a coin that is already in a strong run, measured by its 14-day return. Also don't buy a coin in a strong fall. This targets the repeated shorting of SUI, BONK and LAB.
+2. **Momentum book:** run a small 14-day momentum portfolio next to A101_055. It is the only piece found so far that made money in all three bad windows.
+3. **Hold longer** (overlapping baskets): the fade lasts about 10 days, and in Box 2 the shorts were right after 3-5 days.
+4. **Scale by the strategy's own recent volatility.** Backed by the papers, but out-of-sample results are mixed.
 
 ### Stages 1-4: draft plan (written before the owner chose to ignore costs; to be redone after stage 0b)
 

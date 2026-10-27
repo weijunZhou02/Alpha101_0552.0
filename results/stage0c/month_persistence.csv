@@ -1,0 +1,6 @@
+,0
+Train months,34
+"Train: next month after a losing month, bp/day",12.6891
+"Train: next month after a winning month, bp/day",9.82157
+"Train: corr(month, next month)",-0.2228
+"All months: corr(month, next month) (information)",-0.0971281
