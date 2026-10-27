@@ -23,6 +23,16 @@ mkdir -p data && cp ../A101_055-main/data/*.csv.gz data/
 .venv/bin/python check_baseline.py
 ```
 
+## Files
+
+| File | What it is |
+| --- | --- |
+| `a101_055.py`, `backtest.py`, `get_history.py` | Unchanged copies of the original scripts |
+| `check_baseline.py` | Confirms the lab still reproduces the original backtest |
+| `stage0.py` | Stage 0: facts and post-mortem (writes `results/stage0/`) |
+| `baseline/` | The original backtest's summary, daily results, a live list, and data checksums |
+| `results/` | Tables from each stage (kept in git) |
+
 ## The baseline check
 
 `check_baseline.py` makes sure the lab still gives the original numbers. It:
@@ -88,6 +98,91 @@ Bad 1 overlaps the last 6 weeks of Train.
    - how deep drawdowns get when Train's daily results are reshuffled in 30-day blocks (2,000 paths).
 
 **Output:** tables below, plus a list of guesses tagged "born from bad periods". These guesses can become rules for stages 1-4 (rule 7).
+
+#### Stage 0 results (run 2026-10-27)
+
+The re-run equals the original backtest on all 2,036 days. All tables are in `results/stage0/`.
+
+**1. Where the money went** (bp a day; each side measured against the market average)
+
+| | Train | Bad 1 | Bad 2 | Other |
+| --- | --- | --- | --- | --- |
+| Days | 1,008 | 340 | 321 | 411 |
+| After costs, compounded | +58% | −36% | −35% | +102% |
+| Before costs, compounded | +177% | −22% | −9% | +169% |
+| Sharpe after costs | 1.10 | −2.54 | −1.45 | 2.69 |
+| Long side vs market | +4.2 | −3.1 | −0.8 | +10.2 |
+| Short side vs market | +6.3 | −3.7 | −0.9 | +14.8 |
+| Fees + slippage | −5.5 | −5.5 | −5.5 | −5.5 |
+| Funding (long + short) | 0.0 | −0.3 | **−4.8** (long +4.1, short −8.9) | −1.6 |
+| **After costs** | **+4.9** | **−12.5** | **−11.9** | **+17.9** |
+| Rank IC (t) | 0.041 (10.6) | 0.017 (2.4) | 0.030 (4.2) | 0.051 (8.7) |
+
+- **Neither drawdown was a crash.** The edge faded (Bad 1: both sides lost a little; Bad 2: both sides about zero) while fees kept costing 5.5 bp every day. Zero edge plus fees is about −20% a year.
+- **The ranking never broke.** The IC stayed positive in both bad periods. But the 16 + 16 coins at the two ends didn't pay.
+- **Bad 2 added funding:** the shorts paid 8.9 bp a day.
+
+**2. Which coins** (bp a day of the book, price against the market plus funding)
+
+| Group | Train short | Bad 1 short | Bad 2 short | Other short |
+| --- | --- | --- | --- | --- |
+| Calm third | +1.7 | −0.9 | +0.4 | −1.1 |
+| Middle third | +2.6 | +2.2 | +0.2 | +1.8 |
+| **Wild third** | +2.6 | −3.4 | **−10.3** (funding −7.9) | **+10.3** |
+
+- **Wild-coin shorts swing the whole result.** In Bad 2 they lost 10.3 bp a day, mostly funding. In the recoveries they earned 10.3.
+- **Bad 2 losses were concentrated.** The 10 worst coins cost 43% of equity, more than the whole period's loss (38%, simple sums). FHE cost 8.5% and POWER 6.8%, both recently listed hype coins.
+- **Bad 1 was a broad bleed.** The 10 worst coins (SUI, RUNE, ENS, WIF, BONK, …) cost 29% of a 42% loss. On the long side, coins listed over a year lost 5.9 bp a day.
+- **Less liquid coins hurt in both bad periods** (places 51-80 by volume). But they also earned well in Train and in the recoveries.
+
+**3. Market conditions**
+
+| | Train | Bad 1 | Bad 2 | Other |
+| --- | --- | --- | --- | --- |
+| Market (top-80 average) bp/day | +3.2 | +12.1 | −27.7 | +0.7 |
+| Market volatility, % a year | 92 | **77** | **73** | 81 |
+| BTC minus market bp/day | −0.7 | +9.6 | +11.2 | +21.3 |
+| Spread of coin returns (daily std) | 4.2% | 4.3% | 7.0% | 6.2% |
+| Coins with funding < −0.1%/day | 4.9% | 2.0% | **12.9%** | 7.2% |
+| Coins with funding > +0.1%/day | 7.2% | 11.8% | 4.3% | 4.1% |
+
+- Bad 1 was a calm, BTC-led rally with positive funding. Bad 2 was an altcoin fall full of crowded shorts (negative funding).
+- So no single market condition explains both. "BTC beat altcoins" happened even more in the recoveries.
+- The one thing both bad periods share: **the market was calmer** than in Train and in the recoveries.
+
+**4. The 20 worst days**
+- In 18 of the 20, the coin that hurt most was a **short that jumped**, by +13% to +123% in a day, often costing 2-4% of equity by itself.
+- 11 of the 20 are in Bad 2.
+- The worst day: −4.9% on 2026-02-11, when BERA (short) rose +89%.
+
+**5. How unusual were the drawdowns?**
+
+| | Worst 12 months inside Train | Calendar 2024 |
+| --- | --- | --- |
+| After costs | −3% | −29% |
+| Before costs | +18% | −13% |
+| Rank IC (12-month average) | 0.034 (lowest) | 0.021 |
+
+Reshuffling the daily results in 30-day blocks gives 2,000 paths of 2,036 days each:
+
+| | Train days only | All days (information) |
+| --- | --- | --- |
+| Typical (median) worst drawdown | −17% | −36% |
+| 1 path in 10 is worse than | −24% | −53% |
+| Paths with a drawdown as deep as −35.6% | **0.5%** | 50% |
+
+- **2021-2023 badly understates the risk.** If the future looked like Train, a −35% drawdown would happen in 1 path out of 200. It happened twice in 5.6 years.
+- Train is also the period A101_055 was picked on, so it flatters the alpha.
+- **For planning the money:** expect drawdowns of 35-55% with the current version. Position size has to survive that.
+
+#### Guesses born from bad periods (rule 7: test on 2021-2023 and new days, never tune to 2024-2026)
+
+| # | Guess | Evidence | Possible rule (round numbers) |
+| --- | --- | --- | --- |
+| G1 | Short squeezes cause most of the worst days | 18 of the 20 worst days; Bad 2's top-10 losers | Stop-loss on each short at +30% within the day (daily highs allow a rough test). Also (g) and (d) |
+| G2 | Funding on wild shorts | Bad 2: −7.9 of −10.3 bp a day | Funding guard (h), already planned |
+| G3 | The edge is weaker in calm markets | Market volatility 77% and 73% in the bad periods vs 92% in Train | First a fact check inside Train: do calmer months earn less? This matters for (j): volatility targeting makes the book *bigger* in calm markets, which this guess says is the wrong way |
+| G4 | Fees cause the bleed when there is no edge | 5.5 bp a day in every period | Stage 1 (trade less), already planned |
 
 ### Stages 1-4: draft plan (to be finished and approved after stage 0)
 

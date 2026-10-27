@@ -1,0 +1,74 @@
+trait,group,period,side,price vs market bp/day,funding bp/day,total bp/day,share of side's coin-days %
+volatility,1 calm third,Train,BUY,0.474043,-0.355308,0.118735,37.9842
+volatility,2 middle third,Train,BUY,1.54194,-0.278846,1.2631,32.2045
+volatility,3 wild third,Train,BUY,2.14596,0.100279,2.24624,29.8051
+volatility,unknown,Train,BUY,-0.0127697,-9.3006e-05,-0.0128627,0.00616827
+volatility,1 calm third,Train,SHORT,1.41466,0.283354,1.69801,25.8309
+volatility,2 middle third,Train,SHORT,2.1246,0.423669,2.54827,33.6
+volatility,3 wild third,Train,SHORT,2.7915,-0.200934,2.59057,40.5692
+volatility,1 calm third,Bad 1,BUY,-1.67957,-0.741199,-2.42077,39.3287
+volatility,2 middle third,Bad 1,BUY,-2.27558,-0.585953,-2.86153,31.8132
+volatility,3 wild third,Bad 1,BUY,0.904785,-0.490423,0.414362,28.8581
+volatility,1 calm third,Bad 1,SHORT,-1.27889,0.379278,-0.899611,23.989
+volatility,2 middle third,Bad 1,SHORT,1.55592,0.593432,2.14935,35.864
+volatility,3 wild third,Bad 1,SHORT,-3.98593,0.574006,-3.41192,40.1471
+volatility,1 calm third,Bad 2,BUY,-0.624646,0.0681284,-0.556518,38.0813
+volatility,2 middle third,Bad 2,BUY,-0.0761118,0.384666,0.308554,35.0846
+volatility,3 wild third,Bad 2,BUY,-0.0880307,3.65452,3.56649,26.834
+volatility,1 calm third,Bad 2,SHORT,0.406275,-0.043445,0.36283,22.0989
+volatility,2 middle third,Bad 2,SHORT,1.20994,-0.992573,0.217366,31.5031
+volatility,3 wild third,Bad 2,SHORT,-2.47834,-7.86606,-10.3444,46.398
+volatility,1 calm third,Other,BUY,4.9165,-0.232419,4.68408,37.2415
+volatility,2 middle third,Other,BUY,-0.0080185,0.140727,0.132709,32.7859
+volatility,3 wild third,Other,BUY,5.27109,2.18205,7.45314,29.9726
+volatility,1 calm third,Other,SHORT,-1.19897,0.149148,-1.04982,23.0687
+volatility,2 middle third,Other,SHORT,2.50683,-0.691429,1.8154,34.7172
+volatility,3 wild third,Other,SHORT,13.4406,-3.11917,10.3214,42.2141
+liquidity,1 volume rank 1-20,Train,BUY,0.978744,0.131818,1.11056,26.6408
+liquidity,2 rank 21-50,Train,BUY,1.09367,-0.221386,0.872289,34.8014
+liquidity,3 rank 51-80,Train,BUY,2.07676,-0.444399,1.63236,38.5579
+liquidity,1 volume rank 1-20,Train,SHORT,1.72884,-0.107391,1.62145,23.4375
+liquidity,2 rank 21-50,Train,SHORT,2.99516,0.269286,3.26445,42.6029
+liquidity,3 rank 51-80,Train,SHORT,1.60676,0.344193,1.95095,33.9596
+liquidity,1 volume rank 1-20,Bad 1,BUY,-0.724131,-0.371897,-1.09603,24.097
+liquidity,2 rank 21-50,Bad 1,BUY,-0.229595,-0.710511,-0.940105,38.672
+liquidity,3 rank 51-80,Bad 1,BUY,-2.09664,-0.735167,-2.83181,37.2309
+liquidity,1 volume rank 1-20,Bad 1,SHORT,-0.563538,0.214294,-0.349244,23.2904
+liquidity,2 rank 21-50,Bad 1,SHORT,0.487965,0.687388,1.17535,40.7169
+liquidity,3 rank 51-80,Bad 1,SHORT,-3.63332,0.645034,-2.98829,35.9926
+liquidity,1 volume rank 1-20,Bad 2,BUY,4.90367,2.32453,7.2282,26.0362
+liquidity,2 rank 21-50,Bad 2,BUY,-3.68626,1.0819,-2.60436,39.5991
+liquidity,3 rank 51-80,Bad 2,BUY,-2.0062,0.700887,-1.30532,34.3647
+liquidity,1 volume rank 1-20,Bad 2,SHORT,3.28055,-2.06616,1.21439,20.9696
+liquidity,2 rank 21-50,Bad 2,SHORT,-0.360065,-4.11571,-4.47578,41.5109
+liquidity,3 rank 51-80,Bad 2,SHORT,-3.78261,-2.72021,-6.50283,37.5195
+liquidity,1 volume rank 1-20,Other,BUY,3.32117,0.417025,3.7382,23.4793
+liquidity,2 rank 21-50,Other,BUY,1.46271,1.41354,2.87625,40.146
+liquidity,3 rank 51-80,Other,BUY,5.3957,0.259793,5.65549,36.3747
+liquidity,1 volume rank 1-20,Other,SHORT,2.95092,-0.725919,2.225,22.795
+liquidity,2 rank 21-50,Other,SHORT,4.75786,-2.13976,2.6181,40.6782
+liquidity,3 rank 51-80,Other,SHORT,7.03968,-0.795775,6.24391,36.5268
+age,1 listed < 6 months,Train,BUY,0.828162,-0.164073,0.664088,8.4752
+age,2 6-12 months,Train,BUY,0.446945,-0.165195,0.28175,17.8386
+age,3 over 1 year,Train,BUY,2.87407,-0.204699,2.66937,73.6862
+age,1 listed < 6 months,Train,SHORT,1.56583,0.256895,1.82273,12.2768
+age,2 6-12 months,Train,SHORT,1.00953,0.429255,1.43878,20.5667
+age,3 over 1 year,Train,SHORT,3.75539,-0.180061,3.57533,67.1565
+age,1 listed < 6 months,Bad 1,BUY,-0.447271,-0.163957,-0.611228,12.5319
+age,2 6-12 months,Bad 1,BUY,1.87492,-0.28409,1.59083,14.0825
+age,3 over 1 year,Bad 1,BUY,-4.47802,-1.36953,-5.84755,73.3856
+age,1 listed < 6 months,Bad 1,SHORT,-0.901042,0.39836,-0.502682,16.6176
+age,2 6-12 months,Bad 1,SHORT,-1.28297,0.281095,-1.00187,20.4044
+age,3 over 1 year,Bad 1,SHORT,-1.52489,0.86726,-0.657626,62.9779
+age,1 listed < 6 months,Bad 2,BUY,-2.44451,2.46811,0.0235995,11.7338
+age,2 6-12 months,Bad 2,BUY,1.66045,0.7555,2.41595,16.8321
+age,3 over 1 year,Bad 2,BUY,-0.00473553,0.883709,0.878974,71.4341
+age,1 listed < 6 months,Bad 2,SHORT,0.938532,-3.38304,-2.44451,17.3287
+age,2 6-12 months,Bad 2,SHORT,-4.58265,-2.01858,-6.60123,20.2492
+age,3 over 1 year,Bad 2,SHORT,2.78198,-3.50046,-0.718475,62.4221
+age,1 listed < 6 months,Other,BUY,1.43185,0.780739,2.21259,12.0894
+age,2 6-12 months,Other,BUY,4.11195,0.611914,4.72386,13.017
+age,3 over 1 year,Other,BUY,4.63577,0.697704,5.33347,74.8936
+age,1 listed < 6 months,Other,SHORT,6.28459,-0.67769,5.6069,14.9179
+age,2 6-12 months,Other,SHORT,3.63476,-0.413924,3.22084,16.2257
+age,3 over 1 year,Other,SHORT,4.8291,-2.56984,2.25926,68.8564

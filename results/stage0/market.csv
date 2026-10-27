@@ -1,0 +1,9 @@
+,Train,Bad 1,Bad 2,Other
+market (top-80 average) bp/day,3.15647,12.0526,-27.6518,0.712411
+market up days %,54.5635,52.6471,48.9097,49.8783
+"market volatility, % a year",91.9821,76.5703,73.2993,80.54
+BTC minus market bp/day,-0.691299,9.57999,11.1454,21.3327
+spread of coin returns (daily std) %,4.175,4.26177,6.97346,6.21824
+average funding %/day,0.0125217,0.0347604,-0.0989989,-0.0426219
+"coins with funding < -0.1%/day, %",4.86671,2.01349,12.87,7.22038
+"coins with funding > +0.1%/day, %",7.17794,11.8373,4.26574,4.10201
