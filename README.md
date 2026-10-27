@@ -67,6 +67,7 @@ mkdir -p data && cp ../A101_055-main/data/*.csv.gz data/
 | `stage2.py` | Stage 2: trend guard, momentum book, holding longer, volatility scaling (writes `results/stage2/`) |
 | `after_costs_chart.py` | Today's version vs (v) after costs, and (v)'s position size (writes `results/stage2/after_costs.png`) |
 | `drawdowns.py` | The two big after-cost drawdowns, month by month (writes `results/drawdowns/`) |
+| `stage2b.py` | Stage 2b: the funding guard, judged after costs (writes `results/stage2b/`) |
 | `baseline/` | The original backtest's summary, daily results, a live list, and data checksums |
 | `results/` | Tables from each stage (kept in git) |
 
@@ -698,6 +699,55 @@ After costs, funding included:
 **Final version:** if (h+v) passes, it replaces (v) as the final version. If only (h) passes, the guard is noted, but (v) stays the final version. If neither passes, (v) stays.
 
 Script: `stage2b.py`. Results: `results/stage2b/`.
+
+#### Stage 2b results (run 2026-10-27)
+
+Version (a) reproduced the original backtest.
+
+**Judged after costs (3.5 bp per dollar traded, funding included), 2021-03-29 to 2023-12-31**
+
+| Version | Against | Sharpe | bp/day | Worst drawdown | Worst 1% of days | Difference, bp/day (t) | Turnover | Verdict |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| (h) guard | (a) | 2.01 | 8.0 | −9.6% | −2.43% | +0.3 (0.22) | 75% | PASS |
+| (h+v) guard + scaling | (a) | 2.07 | 8.7 | −10.8% | −2.44% | +1.0 (0.67) | 83% | PASS |
+| (h+v) guard + scaling | (v) | 2.07 | 8.7 | −10.8% | −2.44% | +0.1 (0.05) | 83% | PASS |
+
+For reference, after costs on 2021-2023: (a) Sharpe 1.71, (v) Sharpe 1.77.
+
+**By the declared rule, (h+v) replaces (v) as the final version.** As expected for insurance, the 2021-2023 difference is small (t 0.05 to 0.67): "no clear harm", not "clearly better".
+
+![Stage 2b: the funding guard, after costs](results/stage2b/guard.png)
+
+**How often the guard acted** (share of list places it changed):
+
+| | Train | Drawdown 1 | Drawdown 2 | Box 2 | All 2024-26 |
+| --- | --- | --- | --- | --- | --- |
+| Shorts replaced | 6.6% | 4.1% | **25.4%** | 27.0% | 15.6% |
+| Longs replaced | 1.6% | 3.3% | 4.5% | 4.6% | 3.1% |
+
+**Information only (already seen; never used to choose):** total return by year at 3.5 bp, funding included.
+
+| | 2021 | 2022 | 2023 | 2024 | 2025 | 2026 |
+| --- | --- | --- | --- | --- | --- | --- |
+| (a) | +40.5% | +17.3% | +26.8% | −21.3% | +17.6% | +22.8% |
+| (v) | +43.5% | +23.1% | +29.2% | −18.1% | **+29.4%** | +15.3% |
+| (h) | +32.0% | +24.3% | +32.5% | −18.6% | +6.2% | +33.1% |
+| (h+v) | +30.7% | **+29.7%** | **+37.2%** | −18.8% | +8.4% | +22.4% |
+
+| Total return at 3.5 bp | Drawdown 2 | Box 2 | All of 2024-26 |
+| --- | --- | --- | --- |
+| (a) | −28.5% | −25.8% | +13.6% |
+| (v) | −18.0% | −16.0% | **+22.1%** |
+| (h) | −22.1% | −9.2% | +15.1% |
+| (h+v) | **−15.1%** | **−6.4%** | +7.7% |
+
+**What it shows**
+- **The guard did its job in crowded-short markets.** It cut Drawdown 2 from −18% to −15% with scaling (from −29% to −22% without), and Box 2 from −16% to −6%.
+- **It is not free insurance. It costs money in some markets:**
+  - In the first half of 2025, today's version made +38% and the guarded version only +13-15%. The crowded shorts it skipped fell hard, more than enough to pay their funding.
+  - In spring 2021, skipping longs with high positive funding cost about 8-13 points.
+- **Over all of 2024-2026, (h+v) made less than (v) alone** (+7.7% against +22.1%), mainly because of the first half of 2025.
+- The verdict follows the declared rule. These later-year numbers cannot change it (rule 7), but they mean the forward test should track both (v) and (h+v).
 
 ### Stages 1-4: draft plan (written before the owner chose to ignore costs; to be redone after stage 0b)
 
