@@ -674,6 +674,31 @@ After costs, funding included:
 - At market-order costs, a normal 11-month stretch makes about +10% after costs, and a bad one loses about 36%.
 - Fees alone are about −20% in any 11 months. At 3.5 bp per dollar traded (mostly limit orders) they would be −9% in each drawdown instead of −19 to −20%.
 
+### Stage 2b: funding guard, judged after costs (declared 2026-10-27)
+
+**Why:** in Drawdown 2, 25% of the shorted coins already paid heavy negative funding. Keeping them cost about 26% of equity: −29.1% in funding against +3.4% from their falling prices, before counting replacements. In 2021-2023 such coins were only 6% of shorts and about break-even. So the guard is insurance for crowded-short markets.
+
+**The guard:** `f7` is a coin's average daily funding over the last 7 days, known at the signal day's close.
+- When the lists are made, a coin with `f7` below −0.1% a day cannot be shorted, and a coin with `f7` above +0.1% a day cannot be bought.
+- Each list is refilled from the next scores. Nothing else changes: no orders wait on the exchange, and trading stays once a day.
+- −0.1% a day is the line the live script already flags. It is not tuned.
+
+**Versions**
+- (h) the guard on today's version.
+- (h+v) the guard plus volatility scaling as in stage 2. The scaling is computed from (h)'s own unscaled results.
+
+**Judged after costs:** 3.5 bp per dollar traded (mostly limit orders + BNB), funding included, on trade days 2021-03-29 to 2023-12-31.
+
+**Insurance rule:**
+- (h) passes if, after costs, it is not clearly worse than today's version (a): t of the day-by-day difference above −1. The same days must not all be identical.
+- (h+v) must pass the same test against (a), **and** against (v), the stage 2 final version.
+
+**Information only:** before costs and at 7.5 bp; 2024-2026; Drawdown 1, Drawdown 2, Box 1, Box 2, Dip 3; how many shorts and longs the guard replaced; funding paid.
+
+**Final version:** if (h+v) passes, it replaces (v) as the final version. If only (h) passes, the guard is noted, but (v) stays the final version. If neither passes, (v) stays.
+
+Script: `stage2b.py`. Results: `results/stage2b/`.
+
 ### Stages 1-4: draft plan (written before the owner chose to ignore costs; to be redone after stage 0b)
 
 Each stage is compared with the best version so far, starting from (a), today's version.
