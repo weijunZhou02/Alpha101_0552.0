@@ -504,6 +504,34 @@ The bet: **loud pumps fade, and quiet coins catch up.**
 3. **Hold longer** (overlapping baskets): the fade lasts about 10 days, and in Box 2 the shorts were right after 3-5 days.
 4. **Scale by the strategy's own recent volatility.** Backed by the papers, but out-of-sample results are mixed.
 
+### Stage 2: trend guard, momentum book, holding longer, volatility scaling (declared 2026-10-27)
+
+These ideas come from stage 0c and the literature scan, so they were born from bad periods (rule 7). Their numbers are round and fixed here, before running.
+
+**Setup**
+- Each version is tested alone against today's version (a), with the same accounting as stage 1.
+- **Judged before costs, on trade days 2021-03-29 to 2023-12-31 only.**
+- **Information only:** after-cost results at 3.5 bp per dollar traded (mostly limit orders) and 7.5 bp (market orders + BNB), funding included; and 2024, 2025-26 and the three bad windows.
+- **Script:** `stage2.py`. Its version (a) must first reproduce the original backtest.
+
+**The 5 versions**
+
+| | Change | Rule |
+| --- | --- | --- |
+| (t1) | **Trend guard on shorts.** A coin whose 14-day return (close to close, ending on the signal day) is in the top 20% of the day's universe cannot be shorted. The SHORT list is refilled from the next-lowest scores. The BUY list is unchanged. | A |
+| (t2) | **Trend guard on both sides.** As (t1), and also a coin whose 14-day return is in the bottom 20% cannot be bought. The BUY list is refilled from the next-highest scores. | A |
+| (s) | **Momentum book.** 75% of the money follows (a) and 25% follows a separate 14-day momentum book. That book is long the 16 coins with the highest 14-day return and short the 16 with the lowest (universe coins only), half per side, equal weights. A coin in both books nets out. | B |
+| (c) | **Hold longer.** The weights are the average of the target weights from today's, yesterday's and the day before's lists (3 overlapping baskets, rebalanced daily). | A |
+| (v) | **Scale by the strategy's own volatility.** All weights are multiplied by usual vol / recent vol, kept between 0.5x and 1.5x. Recent vol = std of (a)'s before-cost daily returns over the last 30 trade days, up to the day before. Usual vol = the median of all earlier recent-vol values. The scale stays at 1x until there are 90 days of history. | B |
+
+**Rules:** Rule A and Rule B as in stage 1.
+
+**Final version**
+- If both (t1) and (t2) pass, only the one with the higher Train Sharpe is used.
+- Passing versions are combined in this order: trend guard → overlapping baskets → momentum book → volatility scaling.
+- The combination must pass every rule its parts passed. Otherwise the final version is the single passer with the highest Train Sharpe.
+- If nothing passes, today's version stays.
+
 ### Stages 1-4: draft plan (written before the owner chose to ignore costs; to be redone after stage 0b)
 
 Each stage is compared with the best version so far, starting from (a), today's version.
