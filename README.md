@@ -66,6 +66,7 @@ mkdir -p data && cp ../A101_055-main/data/*.csv.gz data/
 | `stage0c.py` | Stage 0c: why the bad windows happened (writes `results/stage0c/`) |
 | `stage2.py` | Stage 2: trend guard, momentum book, holding longer, volatility scaling (writes `results/stage2/`) |
 | `after_costs_chart.py` | Today's version vs (v) after costs, and (v)'s position size (writes `results/stage2/after_costs.png`) |
+| `drawdowns.py` | The two big after-cost drawdowns, month by month (writes `results/drawdowns/`) |
 | `baseline/` | The original backtest's summary, daily results, a live list, and data checksums |
 | `results/` | Tables from each stage (kept in git) |
 
@@ -635,6 +636,43 @@ After costs, funding included:
 | (v), 7.5 bp | **+7.4%** | **0.49** | −35% | **$14,855** | −26% | +17% | +9% |
 
 (v) was chosen on 2021-2023 only. Later years were already seen, so they are information only.
+
+### Stage 0d: the two big after-cost drawdowns, month by month (2026-10-27, describes only)
+
+`drawdowns.py` prices today's version at 7.5 bp per dollar traded (market orders + BNB), with funding. It splits each fall of more than 25% into long side, short side, fees and funding. Files: `results/drawdowns/`.
+
+![Where the two big after-cost drawdowns came from](results/drawdowns/drawdowns.png)
+
+| % of equity, simple sums | Drawdown 1: 2023-11-18 to 2024-10-27 | Drawdown 2: 2025-07-22 to 2026-06-07 |
+| --- | --- | --- |
+| Fall (compounded) | −36.4% | −35.3% |
+| Long side vs market | −10.3 | −2.5 |
+| Short side vs market | −12.3 | −2.8 |
+| **Fees + slippage** | **−20.2** | **−18.9** |
+| **Funding** | −1.0 | **−15.4** |
+| Net | −43.8 | −39.6 |
+| The 20 worst days | −45.5 (a normal stretch of the same length: −34) | **−71.3** (normal: −33) |
+| All other days | **+1.7** (normal: +44) | +31.7 (normal: +43) |
+| Daily volatility | 0.93% (normal 0.86%) | **1.58%** |
+| Market over the window | +7% | −68% |
+| (v) over the window (average size) | −33.8% (0.9x) | **−23.4% (0.7x)** |
+
+**Two different kinds of failure**
+- **Drawdown 1 was a silent bleed.**
+  - The edge on ordinary days disappeared: +1.7% instead of the usual +44%. 10 of the 12 months lost between 1.5% and 9.4%.
+  - The short side lost most in January-February 2024, when SUI and memecoins kept rising while the market rose 34% in February, and again in October 2024.
+  - Fees took 1.8% every month whatever happened, so they made up almost half the loss.
+  - Volatility stayed normal, so (v) saw nothing to react to.
+- **Drawdown 2 was a violent one, paid for in costs.**
+  - Over the whole window the price edge was almost zero (−5%).
+  - The loss came from fees (−19%), funding on shorts in a falling market full of crowded shorts (−15%), and a few extreme days: the 20 worst cost twice the normal amount.
+  - October 2025 lost 12%: the crash, when the coins held long fell more than the market.
+  - December 2025 lost 20%: squeezes such as FHE +99% on 12-14, ZBT +71% on 12-29 and RIVER +123% on 12-31.
+  - Volatility almost doubled, so (v) cut its size and lost 23% instead of 35%.
+
+**Why one bad stretch gives back years of profit:**
+- At market-order costs, a normal 11-month stretch makes about +10% after costs, and a bad one loses about 36%.
+- Fees alone are about −20% in any 11 months. At 3.5 bp per dollar traded (mostly limit orders) they would be −9% in each drawdown instead of −19 to −20%.
 
 ### Stages 1-4: draft plan (written before the owner chose to ignore costs; to be redone after stage 0b)
 
