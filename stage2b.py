@@ -175,7 +175,84 @@ def main():
         OUT / f"daily_net_{COST}bp.csv", float_format="%.8g", date_format="%Y-%m-%d")
     (OUT / "final.txt").write_text(note + "\n")
     chart(results, OUT / "guard.png")
+    full = after_costs_all(results, OUT / "after_costs_all.png")
+    print("\nWHOLE BACKTEST AFTER COSTS (funding included)")
+    print(full.to_string(float_format=lambda x: f"{x:,.2f}"))
+    full.to_csv(OUT / "after_costs_all.csv", float_format="%.6g")
     print(f"\nSaved {OUT.relative_to(HERE)}/")
+
+
+LINES = {  # version -> (label, colour, width); grey = today's version, then fixed categorical order
+    "a": ("(a) today's version", "#52514e", 1.3),
+    "v": ("(v) volatility scaling", "#2a78d6", 1.8),
+    "h": ("(h) funding guard", "#eb6834", 1.8),
+    "h+v": ("(h+v) guard + scaling", "#1baf7a", 1.8),
+}
+
+
+def after_costs_all(results, path):
+    """All four versions after costs at both cost levels, plus a whole-period table."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.dates as mdates
+    import matplotlib.pyplot as plt
+    import matplotlib.ticker as ticker
+
+    rows = []
+    for cost in (COST, 7.5):
+        for name, d in results.items():
+            r = net(d, cost)
+            equity = (1 + r).cumprod()
+            rows.append({"cost bp": cost, "version": LINES[name][0],
+                         "a year %": (equity.iloc[-1] ** (bt.DAYS_PER_YEAR / len(r)) - 1) * 100,
+                         "Sharpe": r.mean() / r.std() * np.sqrt(bt.DAYS_PER_YEAR),
+                         "worst drawdown %": (equity / equity.cummax() - 1).min() * 100,
+                         "$10,000 becomes": 10_000 * equity.iloc[-1]})
+    table = pd.DataFrame(rows).set_index(["cost bp", "version"])
+
+    ink, ink2, grid, axis = "#0b0b0b", "#52514e", "#e1e0d9", "#c3c2b7"
+    wash, surface = "#f0efec", "#fcfcfb"
+    plt.rcParams.update({
+        "font.family": ["Helvetica Neue", "Arial", "DejaVu Sans"], "font.size": 9,
+        "axes.edgecolor": axis, "axes.labelcolor": ink2, "xtick.color": "#898781",
+        "ytick.color": "#898781", "axes.spines.top": False, "axes.spines.right": False,
+        "axes.grid": True, "axes.grid.axis": "y", "grid.color": grid, "grid.linewidth": 0.6,
+        "figure.facecolor": surface, "axes.facecolor": surface,
+    })
+    fig, axes = plt.subplots(2, 1, figsize=(11, 9), sharex=True)
+    titles = {COST: "mostly limit orders + BNB", 7.5: "market orders + BNB, 3 bp slippage"}
+    for ax, cost in zip(axes, (COST, 7.5)):
+        ax.axvspan(results["a"].index[0], pd.Timestamp(ex.JUDGE[1]), color=wash, lw=0, zorder=0)
+        ends = []
+        for name, (label, color, width) in LINES.items():
+            equity = 10_000 * (1 + net(results[name], cost)).cumprod()
+            ax.plot(equity.index, equity, color=color, lw=width, label=label)
+            ends.append((equity.iloc[-1], color))
+        ends.sort()
+        last_y = None
+        for value, color in ends:                      # end labels, nudged apart in log space
+            y = value if last_y is None else max(value, last_y * 1.045)
+            ax.annotate(f"${value:,.0f}", (results["a"].index[-1], y), xytext=(6, 0),
+                        textcoords="offset points", va="center", color=ink, fontsize=8.5)
+            last_y = y
+        ax.axhline(10_000, color=axis, lw=0.8)
+        ax.set_yscale("log")
+        ax.yaxis.set_major_locator(ticker.LogLocator(subs=(1, 1.5, 2, 3, 5)))
+        ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f"${x:,.0f}"))
+        ax.yaxis.set_minor_formatter(ticker.NullFormatter())
+        ax.set_ylabel("Value of $10,000 (log)")
+        ax.set_title(f"After costs at {cost} bp per dollar traded ({titles[cost]}), funding included",
+                     loc="left", color=ink, fontsize=10)
+        ax.legend(frameon=False, loc="upper left", labelcolor=ink2, ncols=2)
+    axes[1].xaxis.set_major_locator(mdates.YearLocator())
+    axes[1].xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
+    fig.suptitle("All four versions after costs", x=0.01, ha="left", color=ink, fontsize=13)
+    fig.text(0.01, 0.945, "Shaded = 2021-03-29 to 2023-12-31, the only years used to judge. "
+             "Later years are information only.", color=ink2, fontsize=9)
+    fig.tight_layout(rect=(0, 0, 1, 0.94))
+    fig.savefig(path, dpi=150)
+    plt.close(fig)
+    return table
 
 
 def chart(results, path):

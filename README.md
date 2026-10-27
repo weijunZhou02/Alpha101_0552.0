@@ -749,6 +749,21 @@ For reference, after costs on 2021-2023: (a) Sharpe 1.71, (v) Sharpe 1.77.
 - **Over all of 2024-2026, (h+v) made less than (v) alone** (+7.7% against +22.1%), mainly because of the first half of 2025.
 - The verdict follows the declared rule. These later-year numbers cannot change it (rule 7), but they mean the forward test should track both (v) and (h+v).
 
+**All four versions over the whole backtest, after costs** (2021-03 to 2026-10, funding included; information only). Written by `stage2b.py` to `results/stage2b/after_costs_all.png` and `.csv`.
+
+![All four versions after costs](results/stage2b/after_costs_all.png)
+
+| | 3.5 bp: a year | Sharpe | Worst drawdown | $10,000 becomes | 7.5 bp: a year | Sharpe | Worst drawdown | $10,000 becomes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| (a) today's version | +16.8% | 0.84 | −30% | $23,756 | +4.1% | 0.30 | −36% | $12,533 |
+| (v) volatility scaling | **+20.2%** | **1.12** | −28% | **$27,866** | **+7.4%** | **0.49** | −35% | **$14,855** |
+| (h) funding guard | +17.9% | 0.97 | −29% | $25,028 | +5.7% | 0.39 | −41% | $13,637 |
+| (h+v) guard + scaling | +17.9% | 1.11 | −28% | $25,048 | +6.2% | 0.46 | −35% | $13,990 |
+
+- All four versions follow the same path and fall in the same two drawdowns. The guard changes the details, not the shape.
+- Over the whole backtest, (v) alone ends highest at both cost levels. Adding the guard does not add to it.
+- The cost level moves the result far more than any version does: +17-20% a year with mostly limit orders, against +4-7% with market orders.
+
 ### Stages 1-4: draft plan (written before the owner chose to ignore costs; to be redone after stage 0b)
 
 Each stage is compared with the best version so far, starting from (a), today's version.
