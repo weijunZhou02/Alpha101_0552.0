@@ -33,6 +33,7 @@ mkdir -p data && cp ../A101_055-main/data/*.csv.gz data/
 | `stage0b.py` | Stage 0b: post-mortem on the before-cost line (writes `results/stage0b/`) |
 | `make_helpers.py` | Exports the two helper alphas from the main Alpha-mining project to `data/helpers.csv.gz` (run with the main project's Python) |
 | `experiment.py` | Stage 1: tests each change against today's version (writes `results/stage1/`) |
+| `cost_scenarios.py` | Today's version re-priced under Binance fees (writes `results/costs/`) |
 | `baseline/` | The original backtest's summary, daily results, a live list, and data checksums |
 | `results/` | Tables from each stage (kept in git) |
 
@@ -360,6 +361,34 @@ Helper values come from the main Alpha-mining project's alpha engine (`make_help
 - **(d) 1/volatility weights came closest.** It had a slightly higher Sharpe and smaller losses on the worst days. But its worst drawdown was 0.3 points deeper, and it earned 1.2 bp a day less (t −1.13).
 - **(m) had the highest Sharpe (2.61), but its edge over (a) has t 0.94**: it cannot be told apart from luck.
 - **The brake (k) never triggered in 2021-2023**, as noted before running. After 2024 it was on for 182 days and cost 18% against (a), because it halved the size just before recoveries.
+
+### Cost scenarios: today's version under Binance fees (2026-10-27, describes only)
+
+- The owner asked what today's version would have kept under Binance's real fees.
+- `cost_scenarios.py` re-prices the original backtest (`baseline/daily_main.csv`) with different costs per dollar traded. Nothing is tested or chosen.
+- Fees: regular USDⓈ-M futures rates, maker 0.02% and taker 0.05%. With the 10% BNB discount that is 1.8 and 4.5 bp.
+- Slippage of 3 bp is what the paper account measured on its first day.
+- Funding is kept in every row except the first.
+- Files: `results/costs/scenarios.csv`, `results/costs/costs.png`.
+
+Turnover is 79% of equity a day, so **each 1 bp of cost per dollar traded costs about 2.9% a year**. Break-even is 9.7 bp per dollar traded, funding included.
+
+| 2021-03-29 to 2026-10-24 | Cost per $ traded | Kept per day | A year | Sharpe | Worst drawdown | $10,000 becomes | 2024 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Before costs and funding | 0 bp | 8.7 bp | +34.5% | 1.52 | −24% | $52,271 | −13% |
+| No fees, funding paid | 0 | 7.6 | +29.1% | 1.32 | −27% | $41,563 | −13% |
+| Limit orders (maker) + BNB, no slippage | 1.8 | 6.2 | +22.6% | 1.07 | −28% | $31,173 | −17% |
+| 70% maker / 30% taker + BNB, 3 bp slippage on taker | 3.5 | 4.9 | +16.7% | 0.84 | −30% | $23,718 | −21% |
+| **Market orders (taker) + BNB, 3 bp slippage** | **7.5** | **1.7** | **+4.1%** | **0.30** | −36% | **$12,533** | −30% |
+| Backtest as run (taker, no BNB, 2 bp) | 7.0 | 2.1 | +5.6% | 0.36 | −36% | $13,576 | −29% |
+| Taker, no BNB, 3 bp slippage | 8.0 | 1.3 | +2.6% | 0.23 | −38% | $11,570 | −31% |
+| Taker + BNB, 5 bp slippage | 9.5 | 0.1 | −1.7% | 0.03 | −46% | $9,102 | −34% |
+
+- **The order type decides the result.** All market orders keep about 4% a year. Mostly limit orders keep 17-23% a year.
+- **BNB helps a little:** about +1.5% a year with market orders.
+- **2024 loses money in every scenario.**
+- Limit-order fill rates cannot be simulated with daily candles, so only paper or demo trading can show whether the maker rows are reachable.
+- These are backtest numbers. 2021-2023 flatters the alpha, because it was picked on those years.
 
 ### Stages 1-4: draft plan (written before the owner chose to ignore costs; to be redone after stage 0b)
 
