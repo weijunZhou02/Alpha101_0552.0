@@ -31,6 +31,8 @@ mkdir -p data && cp ../A101_055-main/data/*.csv.gz data/
 | `check_baseline.py` | Confirms the lab still reproduces the original backtest |
 | `stage0.py` | Stage 0: facts and post-mortem, after costs (writes `results/stage0/`) |
 | `stage0b.py` | Stage 0b: post-mortem on the before-cost line (writes `results/stage0b/`) |
+| `make_helpers.py` | Exports the two helper alphas from the main Alpha-mining project to `data/helpers.csv.gz` (run with the main project's Python) |
+| `experiment.py` | Stage 1: tests each change against today's version (writes `results/stage1/`) |
 | `baseline/` | The original backtest's summary, daily results, a live list, and data checksums |
 | `results/` | Tables from each stage (kept in git) |
 
@@ -317,6 +319,47 @@ Helper values come from the main Alpha-mining project's alpha engine (`make_help
 - All passing versions together, applied in this order: helper score → coin filters → lists → weights → brake → stop. If both helpers pass, the blend is 0.6 / 0.2 / 0.2.
 - The combination must pass every rule that its parts passed. Otherwise the final version is the single passer with the highest Train Sharpe.
 - If nothing passes, today's version stays.
+
+#### Stage 1 results (run 2026-10-27, before costs)
+
+- Version (a) reproduced the original backtest on all 2,036 days (largest gap 5e-10).
+- The helper alphas had a value for 99.7% of coin-days in 2021-2023.
+- Files: `results/stage1/` (`judged.csv`, `information.csv`, `daily_gross.csv`, `versions.png`).
+
+**Judged on 2021-03-29 to 2023-12-31**
+
+| | Change | Rule | Sharpe | bp/day | Worst drawdown | Worst 1% of days | vs (a), bp/day (t) | Years better | Turnover | Verdict |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| (a) | today's version | - | 2.34 | 10.5 | −10.9% | −2.91% | - | - | 79% | yardstick |
+| (f) | only the 50 most-traded coins | B | 1.62 | 7.4 | −16.3% | −3.04% | −3.1 (−1.46) | 0 | 65% | fail: all three checks |
+| (g) | leave out the wildest 20% | B | 1.82 | 6.7 | −13.2% | **−2.14%** | −3.8 (−1.80) | 0 | 74% | fail: drawdown, t |
+| (d) | 1/volatility weights | B | 2.41 | 9.3 | −11.2% | **−2.07%** | −1.2 (−1.13) | 2 | 82% | fail: drawdown (by 0.3 points), t |
+| (n) | stop-loss on shorts at +30% | B | 2.13 | 9.5 | −11.7% | −2.64% | −1.0 (−1.64) | 0 | 80% | fail: drawdown, t (139 stops) |
+| (k) | half size 15%+ below the peak | B | 2.34 | 10.5 | −10.9% | −2.91% | 0 | - | 79% | untestable: never triggered |
+| (l) | helper: perp premium | A | 2.42 | 12.8 | −19.5% | −4.28% | +2.3 (0.97) | 2 | 97% | fail: t |
+| (m) | helper: GTJA_095 | A | **2.61** | 12.3 | −11.2% | −3.08% | +1.8 (0.94) | 2 | 73% | fail: t |
+
+**Nothing passed, so today's version stays.**
+
+**Information only** (already seen; never used to choose). Difference from (a), bp a day:
+
+| | 2024 | 2025-26 | Box 1 | Box 2 | Dip 3 |
+| --- | --- | --- | --- | --- | --- |
+| (f) 50 most-traded | +5.2 | −9.4 | +6.1 | +11.1 | +27.9 |
+| (g) no wildest 20% | +5.7 | −9.0 | +9.9 | −0.3 | +12.6 |
+| (d) 1/volatility | −1.8 | −3.3 | +0.3 | +4.4 | +20.2 |
+| (n) stop-loss | +0.4 | −4.7 | +0.1 | −2.8 | −4.1 |
+| (k) brake | −1.9 | −1.7 | +0.5 | +1.7 | −4.3 |
+| (l) premium | +1.8 | −16.7 | +2.1 | −14.0 | +5.5 |
+| (m) GTJA_095 | +6.8 | −7.8 | +5.9 | +3.2 | +1.4 |
+
+**What it shows**
+- **The edge and the risk sit in the same coins.** Leaving out wild or less-traded coins (f, g) cut the bad days but lost 3-4 bp a day in normal times. The coins that hurt in bad windows are also the coins that pay in good ones.
+- **Fixing 2024 broke 2025-2026.** (f), (g) and (m) would have helped in 2024 (+5 to +7 bp a day), but they lost 8-9 bp a day in 2025-2026. This is the trap that rule 7 guards against.
+- **The stop-loss hurt everywhere.** Most +30% spikes within a day fall back by the close, so a stop locks in a loss that would have shrunk.
+- **(d) 1/volatility weights came closest.** It had a slightly higher Sharpe and smaller losses on the worst days. But its worst drawdown was 0.3 points deeper, and it earned 1.2 bp a day less (t −1.13).
+- **(m) had the highest Sharpe (2.61), but its edge over (a) has t 0.94**: it cannot be told apart from luck.
+- **The brake (k) never triggered in 2021-2023**, as noted before running. After 2024 it was on for 182 days and cost 18% against (a), because it halved the size just before recoveries.
 
 ### Stages 1-4: draft plan (written before the owner chose to ignore costs; to be redone after stage 0b)
 
