@@ -1,0 +1,4 @@
+# Pinned to the versions that produced the original backtest (baseline/summary_main.txt)
+numpy==2.3.3
+pandas==3.0.2
+matplotlib==3.10.8  # backtest chart only

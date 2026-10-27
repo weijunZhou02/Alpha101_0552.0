@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.venv/
+# API keys never belong in the lab
+.env
+# frozen data snapshot (27 MB, checksums in baseline/data_sha256.txt) and fresh data
+data/
+data_fresh/
+# experiment output (rebuilt by the scripts)
+out/
+# daily list files a101_055.py writes in the current folder
+/a101_055_*.csv
+# editor and macOS files
+.idea/
+.DS_Store

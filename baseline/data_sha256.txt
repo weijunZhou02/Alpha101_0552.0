@@ -1,0 +1,2 @@
+311c59319ff4e0b7815584f70ce98aa901ff3925aa4137c3dcec83d61eaaff4b  data/klines_1d.csv.gz
+6517f6ac9e75e4148b52ec8b2e13e90bd8ffb647714db087a2f167d21e0930c3  data/funding.csv.gz
