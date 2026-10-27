@@ -682,6 +682,32 @@ The funding guard was declared and tested after costs: no short if the 7-day ave
 - **The owner dropped it on 2026-10-27. (v) stays the working version.**
 - The detailed results were removed at the owner's request. They remain in the git history: commits `00dc745` (declaration), `60d18e5` (results) and `a89b64d` (after-cost chart).
 
+### Parked plans (2026-10-27, to run before trading real money)
+
+Each plan has a short name, so it can be started later by name.
+
+**"Fill Replay": historical test of limit-order-first trading**
+
+- **Question:** what does "limit order first, then a market order for the rest" really cost?
+- **Why it matters:** after costs, (v) makes about +20% a year (Sharpe 1.1) at 3.5 bp per dollar traded, but only about +7% (0.5) at 7.5 bp. The cost level matters more than any change to the strategy.
+- **Data:** Binance's free daily trade files (aggTrades) for the coins traded on a sample of past days. Only 00:00-00:15 is kept.
+  - Past best-bid and best-ask files are not published, so those prices are estimated from the last seller- and buyer-initiated trades.
+  - The live API only covers the last 2 days.
+- **Days:** 150 random days from 2021-03-29 to 2023-12-31, plus 60 days from 2024-2026 as information only (20 from each bad window).
+- **Orders:** the real orders today's version sent at 00:00 on those days (coins entering and leaving the lists; tiny top-ups skipped).
+- **Replay:**
+  - A post-only limit order at the best price on our side, moved to the new best price every minute for 10 minutes.
+  - **Careful fill rule:** it fills only when real trades go *through* the price. The hopeful count (trades *at* the price) is also shown.
+  - Anything unfilled at 10 minutes becomes a market order.
+  - Fees: maker 1.8 bp, taker 4.5 bp (with BNB).
+- **Measured:** share filled as limit orders, minutes to fill, cost per dollar traded against the 00:00 open, how far unfilled coins ran away, and a comparison with all market orders at 00:00.
+- **Then:** re-run the after-cost backtest of (a) and (v) with the measured cost.
+- **Limits:** queue position cannot be seen (hence the careful rule); best prices are estimated; our own effect on the market is not included.
+
+**"Live Fill Check":** the same simulation on live data for 30 trading days. It is a new `exec_test.py` in the live A101_055 folder, using public data only (no API keys, no orders).
+
+**"Forward Test":** (a) against (v) on new days from 2026-10-25, with fresh data in `data_fresh/` and verdicts at 90 and 180 trade days. The full design was proposed on 2026-10-27.
+
 ### Stages 1-4: draft plan (written before the owner chose to ignore costs; to be redone after stage 0b)
 
 Each stage is compared with the best version so far, starting from (a), today's version.
