@@ -29,7 +29,8 @@ mkdir -p data && cp ../A101_055-main/data/*.csv.gz data/
 | --- | --- |
 | `a101_055.py`, `backtest.py`, `get_history.py` | Unchanged copies of the original scripts |
 | `check_baseline.py` | Confirms the lab still reproduces the original backtest |
-| `stage0.py` | Stage 0: facts and post-mortem (writes `results/stage0/`) |
+| `stage0.py` | Stage 0: facts and post-mortem, after costs (writes `results/stage0/`) |
+| `stage0b.py` | Stage 0b: post-mortem on the before-cost line (writes `results/stage0b/`) |
 | `baseline/` | The original backtest's summary, daily results, a live list, and data checksums |
 | `results/` | Tables from each stage (kept in git) |
 
@@ -211,6 +212,75 @@ Describes only. Nothing is tested or chosen. The script `stage0b.py` writes its 
 4. Market conditions.
 5. The 20 worst days before costs.
 6. How unusual: the worst 12 months inside Train, and how deep before-cost drawdowns get when Train's days are reshuffled in 30-day blocks.
+
+#### Stage 0b results (run 2026-10-27, before costs)
+
+The re-run equals the original backtest. All tables are in `results/stage0b/`.
+
+**1. The periods** (bp a day; each side measured against the market average)
+
+| | Train | Box 1 | Box 2 | Dip 3 | Other |
+| --- | --- | --- | --- | --- | --- |
+| Days | 1,008 | 290 | 115 | 45 | 578 |
+| Before costs, compounded | +177% | −24% | −16% | −17% | +256% |
+| Sharpe before costs | 2.34 | −1.81 | −1.69 | −4.16 | 3.34 |
+| Long side vs market | +4.2 | −3.8 | −6.3 | −13.7 | +9.2 |
+| Short side vs market | +6.3 | −5.1 | −8.0 | −25.7 | +13.7 |
+| Rank IC (t) | 0.041 (10.6) | 0.017 (2.0) | 0.017 (1.8) | 0.000 (−0.2) | 0.051 (9.8) |
+| Turnover, % a day | 79 | 78 | 79 | 79 | 78 |
+
+**2. Did the whole ranking flip?** (next-day return against the market, bp a day, 5 groups of 16 coins)
+
+| | Train | Box 1 | Box 2 | Dip 3 | Other |
+| --- | --- | --- | --- | --- | --- |
+| Q1, best scores (≈ BUY list) | +7.2 | −4.6 | −10.5 | −33.4 | +20.2 |
+| Q2 | +3.7 | +2.6 | +1.7 | −16.3 | +2.5 |
+| Q3 | +2.0 | −8.6 | −13.1 | −9.0 | +1.4 |
+| Q4 | +1.6 | −2.2 | +9.4 | +29.9 | +4.6 |
+| Q5, worst scores (≈ SHORT list) | **−13.6** | **+12.7** | **+14.0** | **+24.4** | **−27.6** |
+
+- **The worst-score group is the swing.** These are coins whose price rose to the top of its 12-day range together with a rush of volume. Normally they fall the next day: −13.6 bp a day in Train and −27.6 in the rest of 2024-2026. Most of the alpha's edge comes from here.
+- **In every bad window, those coins kept rising instead** (+12.7 to +24.4). The pumps continued rather than fading.
+- In Box 1 and Box 2 the two ends flipped while the middle was mixed, so the IC stayed slightly positive. In Dip 3 the whole ranking flipped.
+
+**3. Which coins**
+- **Less-traded coins carried the losses.** In Box 2 and Dip 3 the losses came from coins ranked 21-80 by volume. The 20 most-traded coins made money on both sides in Box 2 (+2.9 long, +4.4 short) and on the long side in Dip 3.
+- **Wild coins as well:** shorts of the wildest third lost 5.4 bp a day in Box 1, 6.3 in Box 2 and 28.5 in Dip 3.
+- **Concentration:**
+  - Box 2: the 10 worst coins together lost 31% of equity (FHE alone 7.4%), against −16% for the whole window (simple sums).
+  - Box 1: 27% against −26%.
+
+**4. Market conditions**
+
+| | Train | Box 1 | Box 2 | Dip 3 | Other |
+| --- | --- | --- | --- | --- | --- |
+| Market (top-80 average) bp/day | +3.2 | −0.1 | −39.9 | −21.9 | −3.6 |
+| Market volatility, % a year | 92 | 79 | 82 | 57 | 78 |
+| BTC minus market bp/day | −0.7 | +18.5 | +21.2 | −23.2 | +18.1 |
+| Spread of coin returns (daily std) | 4.2% | 4.2% | 7.1% | 7.3% | 6.4% |
+| Coins with funding < −0.1%/day | 4.9% | 2.1% | 14.0% | 7.4% | 9.0% |
+
+- No market condition separates the bad windows from the good months of 2024-2026 ("Other").
+- BTC beat altcoins just as much in Other. Market volatility in Box 1 and Box 2 was the same as in Other.
+- **Guess G3 from stage 0 ("calm markets are bad") is not supported on the before-cost line. It is dropped.**
+
+**5. The 20 worst days before costs:** 17 were a shorted coin jumping, from +13% to +123% in a day. 10 of the 20 fall inside the three windows.
+
+**6. How unusual**
+- Train never had a losing 12-month stretch before costs; its worst was +18%. The worst in the whole history was −20%, the 12 months to 2024-11-16.
+- Reshuffling Train's days gives a drawdown as deep as −23.7% in 1 path out of 1,000. Its typical worst drawdown is −11.5%.
+- Using all days (information only), the typical worst drawdown is −20%, and 1 path in 10 is worse than −28%.
+- **Plan for before-cost drawdowns of 20-30%**, not the 10-15% that 2021-2023 suggests.
+
+#### Guesses after stage 0b (rule 7: test on 2021-2023 and new days, never tune to 2024-2026)
+
+| # | Guess | Evidence | Possible rule (round numbers) |
+| --- | --- | --- | --- |
+| G1 | Short squeezes cause the worst days | 17 of the 20 worst days | Stop-loss on each short at +30% within the day; smaller bets on wild coins; leave out the wildest 20% |
+| G5 | Less-traded coins carry the losses in bad windows | Box 2 and Dip 3: losses in coins ranked 21-80 by volume, while the top 20 made money | Only the 50 most-traded coins |
+| G6 | Bad windows are times when pumps keep going | The SHORT-list group rose in every bad window | A drawdown brake. Watching the short list's own recent results is possible but easy to overfit |
+| ~~G3~~ | ~~Calm markets are bad~~ | Not supported before costs | Dropped |
+| G2, G4 | Funding, fees | — | Parked: costs are ignored for now |
 
 ### Stages 1-4: draft plan (written before the owner chose to ignore costs; to be redone after stage 0b)
 

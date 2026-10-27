@@ -1,0 +1,92 @@
+trait,group,period,side,price vs market bp/day,share of side's coin-days %
+volatility,1 calm third,Train,BUY,0.474043,37.9842
+volatility,2 middle third,Train,BUY,1.54194,32.2045
+volatility,3 wild third,Train,BUY,2.14596,29.8051
+volatility,unknown,Train,BUY,-0.0127697,0.00616827
+volatility,1 calm third,Train,SHORT,1.41466,25.8309
+volatility,2 middle third,Train,SHORT,2.1246,33.6
+volatility,3 wild third,Train,SHORT,2.7915,40.5692
+volatility,1 calm third,Box 1,BUY,-1.57324,38.9519
+volatility,2 middle third,Box 1,BUY,-2.03706,32.385
+volatility,3 wild third,Box 1,BUY,-0.194362,28.6631
+volatility,1 calm third,Box 1,SHORT,-1.07489,23.8578
+volatility,2 middle third,Box 1,SHORT,1.38089,35.7543
+volatility,3 wild third,Box 1,SHORT,-5.38058,40.3879
+volatility,1 calm third,Box 2,BUY,1.38466,36.6105
+volatility,2 middle third,Box 2,BUY,-2.33908,37.2624
+volatility,3 wild third,Box 2,BUY,-5.33569,26.1271
+volatility,1 calm third,Box 2,SHORT,-0.657657,23.8587
+volatility,2 middle third,Box 2,SHORT,-1.09982,28.75
+volatility,3 wild third,Box 2,SHORT,-6.26438,47.3913
+volatility,1 calm third,Dip 3,BUY,-8.36202,41.5278
+volatility,2 middle third,Dip 3,BUY,-1.43188,34.4444
+volatility,3 wild third,Dip 3,BUY,-3.88508,24.0278
+volatility,1 calm third,Dip 3,SHORT,-2.17746,17.2222
+volatility,2 middle third,Dip 3,SHORT,4.96308,35.9722
+volatility,3 wild third,Dip 3,SHORT,-28.4702,46.8056
+volatility,1 calm third,Other,BUY,3.48821,37.5027
+volatility,2 middle third,Other,BUY,0.527741,33.0054
+volatility,3 wild third,Other,BUY,5.1625,29.4919
+volatility,1 calm third,Other,SHORT,-0.261041,22.8482
+volatility,2 middle third,Other,SHORT,2.29349,34.0614
+volatility,3 wild third,Other,SHORT,11.6185,43.0904
+liquidity,1 volume rank 1-20,Train,BUY,0.978744,26.6408
+liquidity,2 rank 21-50,Train,BUY,1.09367,34.8014
+liquidity,3 rank 51-80,Train,BUY,2.07676,38.5579
+liquidity,1 volume rank 1-20,Train,SHORT,1.72884,23.4375
+liquidity,2 rank 21-50,Train,SHORT,2.99516,42.6029
+liquidity,3 rank 51-80,Train,SHORT,1.60676,33.9596
+liquidity,1 volume rank 1-20,Box 1,BUY,-0.54095,23.508
+liquidity,2 rank 21-50,Box 1,BUY,-0.420058,38.9305
+liquidity,3 rank 51-80,Box 1,BUY,-2.84366,37.5615
+liquidity,1 volume rank 1-20,Box 1,SHORT,-1.75628,23.2328
+liquidity,2 rank 21-50,Box 1,SHORT,-0.631474,40.5819
+liquidity,3 rank 51-80,Box 1,SHORT,-2.68683,36.1853
+liquidity,1 volume rank 1-20,Box 2,BUY,2.85571,26.8876
+liquidity,2 rank 21-50,Box 2,BUY,-5.27962,39.8696
+liquidity,3 rank 51-80,Box 2,BUY,-3.8662,33.2428
+liquidity,1 volume rank 1-20,Box 2,SHORT,4.40811,19.6196
+liquidity,2 rank 21-50,Box 2,SHORT,-5.48997,38.6413
+liquidity,3 rank 51-80,Box 2,SHORT,-6.94,41.7391
+liquidity,1 volume rank 1-20,Dip 3,BUY,3.94428,27.6389
+liquidity,2 rank 21-50,Dip 3,BUY,-4.85308,35.5556
+liquidity,3 rank 51-80,Dip 3,BUY,-12.7702,36.8056
+liquidity,1 volume rank 1-20,Dip 3,SHORT,-1.56596,23.3333
+liquidity,2 rank 21-50,Dip 3,SHORT,-8.15386,46.3889
+liquidity,3 rank 51-80,Dip 3,SHORT,-15.9647,30.2778
+liquidity,1 volume rank 1-20,Other,BUY,4.14568,23.8919
+liquidity,2 rank 21-50,Other,BUY,0.474168,40.1946
+liquidity,3 rank 51-80,Other,BUY,4.55861,35.9135
+liquidity,1 volume rank 1-20,Other,SHORT,3.16098,22.3508
+liquidity,2 rank 21-50,Other,SHORT,4.94797,41.0792
+liquidity,3 rank 51-80,Other,SHORT,5.54195,36.5701
+age,1 listed < 6 months,Train,BUY,0.828162,8.4752
+age,2 6-12 months,Train,BUY,0.446945,17.8386
+age,3 over 1 year,Train,BUY,2.87407,73.6862
+age,1 listed < 6 months,Train,SHORT,1.56583,12.2768
+age,2 6-12 months,Train,SHORT,1.00953,20.5667
+age,3 over 1 year,Train,SHORT,3.75539,67.1565
+age,1 listed < 6 months,Box 1,BUY,-0.502066,13.5187
+age,2 6-12 months,Box 1,BUY,1.66063,14.3316
+age,3 over 1 year,Box 1,BUY,-4.96323,72.1497
+age,1 listed < 6 months,Box 1,SHORT,-1.47442,18.0388
+age,2 6-12 months,Box 1,SHORT,-0.109842,19.5043
+age,3 over 1 year,Box 1,SHORT,-3.49033,62.4569
+age,1 listed < 6 months,Box 2,BUY,-8.74392,14.5573
+age,2 6-12 months,Box 2,BUY,5.74471,15.2634
+age,3 over 1 year,Box 2,BUY,-3.29089,70.1793
+age,1 listed < 6 months,Box 2,SHORT,1.20547,22.7717
+age,2 6-12 months,Box 2,SHORT,-3.86297,20.5435
+age,3 over 1 year,Box 2,SHORT,-5.36435,56.6848
+age,1 listed < 6 months,Dip 3,BUY,-3.56654,3.88889
+age,2 6-12 months,Dip 3,BUY,-3.63075,22.0833
+age,3 over 1 year,Dip 3,BUY,-6.48169,74.0278
+age,1 listed < 6 months,Dip 3,SHORT,6.97449,4.44444
+age,2 6-12 months,Dip 3,SHORT,-38.1852,26.8056
+age,3 over 1 year,Dip 3,SHORT,5.52615,68.75
+age,1 listed < 6 months,Other,BUY,1.62858,12.0216
+age,2 6-12 months,Other,BUY,3.16376,14.1405
+age,3 over 1 year,Other,BUY,4.38611,73.8378
+age,1 listed < 6 months,Other,SHORT,4.23008,15.4196
+age,2 6-12 months,Other,SHORT,3.71842,16.8685
+age,3 over 1 year,Other,SHORT,5.7024,67.7119
