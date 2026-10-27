@@ -682,6 +682,37 @@ The funding guard was declared and tested after costs: no short if the 7-day ave
 - **The owner dropped it on 2026-10-27. (v) stays the working version.**
 - The detailed results were removed at the owner's request. They remain in the git history: commits `00dc745` (declaration), `60d18e5` (results) and `a89b64d` (after-cost chart).
 
+### Stage 3: screen existing trend and reversal alphas as helpers (declared 2026-10-28)
+
+**Idea:** A101_055 makes both kinds of bet.
+
+| A101_055 pick (2021-2023) | Share of side | Volume vs usual | Profit to the bet |
+| --- | --- | --- | --- |
+| Short a coin that was rising (bet: it reverses) | 45% | 1.16× | +21.8 bp/day |
+| Short a coin that was falling (bet: it keeps falling) | 55% | 0.80× | +5.7 |
+| Buy a coin that was rising (bet: it keeps rising) | 31% | 0.99× | +16.0 |
+| Buy a coin that was falling (bet: it reverses) | 69% | 0.68× | +4.8 |
+
+A helper "trend" or "reversal" score could help judge each kind of bet. It would be used as a score among the 80 coins, blended with A101_055, never as a filter. Step 1 looks for such a helper among existing alphas.
+
+**Candidates:** every alpha in the main library's "Momentum / trend" (91) and "Short-term reversal" (38) families that the main project can compute: **126 alphas**. A101_056, CRYPTO_FLPWZ_CTREND and CRYPTO_LT_TSMOM never computed. Each alpha's direction comes from the main project's 2021-2023 scorecard, so higher = expected to do better.
+
+**Data:** `make_candidates.py` (run with the main project's Python) writes `data/candidates_2021_2023.csv.gz`. **It stops at 2023-12-31**, so the screening cannot see later years.
+
+**Measured on trade days 2021-03-29 to 2023-12-31** (`screen.py`; the next-day return is the strategy's own 00:00-to-00:00 return):
+1. **Skill across all 80 coins:** daily rank IC against the next-day return, its t, and its sign in 2021, 2022 and 2023.
+2. **Skill inside A101_055's picks (the key measure):**
+   - Each day, the rank IC within the 16 BUY coins and within the 16 SHORT coins. The day's value is the average of the two.
+   - Reported pooled, by side, and by bet type (reversal bets and continuation bets; a group needs at least 5 coins that day).
+   - A positive value means the helper ranks A101_055's own picks correctly. Among shorts, a high helper score marks a bad short.
+3. **Overlap:** the daily rank correlation with A101_055 across the 80 coins, and how stable the helper's ranks are from day to day.
+
+**Shortlist rule:** inside-picks IC t ≥ 3 **and** inside-picks IC positive in each of 2021, 2022 and 2023 **and** correlation with A101_055 within ±0.3. From those, the best one per family by inside-picks t: at most 2 helpers.
+
+**If nothing passes:** report "no existing alpha helps", and stop. Machine-learning meta-labeling is the next option, needing a separate approval.
+
+**Step 5** (the blend test of the shortlisted helpers) gets its own declaration and approval.
+
 ### Parked plans (2026-10-27, to run before trading real money)
 
 Each plan has a short name, so it can be started later by name.
