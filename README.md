@@ -65,6 +65,7 @@ mkdir -p data && cp ../A101_055-main/data/*.csv.gz data/
 | `cost_scenarios.py` | Today's version re-priced under Binance fees (writes `results/costs/`) |
 | `stage0c.py` | Stage 0c: why the bad windows happened (writes `results/stage0c/`) |
 | `stage2.py` | Stage 2: trend guard, momentum book, holding longer, volatility scaling (writes `results/stage2/`) |
+| `after_costs_chart.py` | Today's version vs (v) after costs, and (v)'s position size (writes `results/stage2/after_costs.png`) |
 | `baseline/` | The original backtest's summary, daily results, a live list, and data checksums |
 | `results/` | Tables from each stage (kept in git) |
 
@@ -607,6 +608,33 @@ After costs, funding included:
 - **The alpha still works in 2025-2026.** Before costs these were among its best years (Sharpe about 1.7). 2024 was the weak year.
 - **Why (v) fell behind in 2026:** after the volatile windows of late 2025 and spring 2026, (v) cut its size to about 0.56x. It then caught only part of the 2026 recovery, though with a slightly higher Sharpe.
 - That is how volatility scaling works: it protects after a volatile spell (second half of 2025: (a) −3.1%, (v) +2.8%) and pays for it by missing part of the rebound.
+
+#### What (v) does, in plain words
+
+1. **Same coins, same signal, same lists as today's version.** Only the amount of money in the market changes from day to day.
+2. Each day it measures how bumpy the strategy's own daily results were over the last 30 days ("recent volatility"). It compares that with how bumpy they usually are: the median of all earlier 30-day readings ("usual volatility").
+3. **Size = usual / recent, kept between 0.5x and 1.5x.**
+   - The strategy usually moves about ±1% a day, but lately ±2%: size 0.5x (half the money).
+   - Lately only ±0.7%: size 1.43x.
+   - Size 1.5x means 75% of equity long and 75% short.
+4. **Why it can help:** bumpy spells tend to cluster, but the edge does not grow with the bumps. Taking less risk in bumpy spells improves the return per unit of risk (Moreira & Muir; Barroso & Santa-Clara).
+5. **What it does not do:**
+   - It does not predict direction.
+   - It cannot dodge the start of a bad period, because it reacts only after the bumps show up.
+   - It misses part of the rebound that often follows a bumpy spell (2026).
+
+`after_costs_chart.py` writes `results/stage2/after_costs.png` and `after_costs_a_vs_v.csv`.
+
+![Today's version vs (v), after costs](results/stage2/after_costs.png)
+
+| After costs, funding included (2021-03 to 2026-10) | A year | Sharpe | Worst drawdown | $10,000 becomes | 2024 | 2025 | 2026 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| (a), 3.5 bp (mostly limit orders) | +16.8% | 0.84 | −30% | $23,756 | −21% | +18% | +23% |
+| (v), 3.5 bp | **+20.2%** | **1.12** | −28% | **$27,866** | −18% | +29% | +15% |
+| (a), 7.5 bp (market orders) | +4.1% | 0.30 | −36% | $12,533 | −30% | +5% | +12% |
+| (v), 7.5 bp | **+7.4%** | **0.49** | −35% | **$14,855** | −26% | +17% | +9% |
+
+(v) was chosen on 2021-2023 only. Later years were already seen, so they are information only.
 
 ### Stages 1-4: draft plan (written before the owner chose to ignore costs; to be redone after stage 0b)
 
