@@ -282,6 +282,42 @@ The re-run equals the original backtest. All tables are in `results/stage0b/`.
 | ~~G3~~ | ~~Calm markets are bad~~ | Not supported before costs | Dropped |
 | G2, G4 | Funding, fees | — | Parked: costs are ignored for now |
 
+### Stage 1: test 7 changes, each alone against today's version (declared 2026-10-27)
+
+**Setup**
+- **Before costs:** no fees and no funding. Turnover is shown for every version.
+- **Judged on trade days 2021-03-29 to 2023-12-31 only.**
+- **Shown as information** (never used to choose): 2024, 2025-01-01 to 2026-10-24, Box 1, Box 2 and Dip 3.
+- **Script:** `experiment.py`. Its version (a) must first reproduce today's backtest exactly: before-cost return and turnover on every day.
+
+**The 7 versions.** Each one changes a single thing; everything else stays as in (a).
+
+| | Change |
+| --- | --- |
+| (f) | **Only the 50 most-traded coins.** Tradable = the day's universe coins ranked 1-50 by 30-day average volume. BUY = the best 16 tradable coins by score, SHORT = the worst 16 tradable coins. Ties at place 16 are kept, as today. |
+| (g) | **Leave out the wildest 20%.** Tradable = universe coins except the 20% with the highest 30-day volatility (std of daily close-to-close returns, at least 20 days). Lists are refilled as in (f). |
+| (d) | **1/volatility weights.** Same coins as (a). Inside each side, weight ∝ 1 / 30-day volatility. Each side is still 50% of equity. |
+| (n) | **Stop-loss on shorts.** Same coins and weights as (a). If a shorted coin trades 30% above that day's open (seen in the daily high), the short is closed and its loss counts as 31%. It is re-entered at the next open if it is still on the list. |
+| (k) | **Drawdown brake.** Same as (a), but all weights are halved on days when (a)'s before-cost equity (up to the day before) is 15% or more below its peak. Known before running: (a)'s worst before-cost drawdown in 2021-2023 was −10.9%. So (k) probably never triggers in the judging period; then it cannot pass and is reported as "untestable on 2021-2023". |
+| (l) | **Helper: perp premium.** Score = 0.7 × daily rank of A101_055 + 0.3 × daily rank of CRYPTO_HMRW_PREMIUM. Ranks are within the day's universe. The helper's direction comes from the main project's training scorecard (−1: buy coins whose perp trades cheap). A missing helper value counts as the middle rank. |
+| (m) | **Helper: GTJA_095** (buy coins with smaller, steadier trading value; direction −1). Same blend as (l). |
+
+Helper values come from the main Alpha-mining project's alpha engine (`make_helpers.py`, commit `fb06995`, data to 2026-10-21).
+
+**Rules**
+- **Measures:**
+  - Sharpe = mean / std × √365 of daily before-cost returns.
+  - t = simple t-statistic of the day-by-day difference from (a).
+  - Worst drawdown is compounded inside the period.
+  - "Worst 1% of days" = the average of the worst 1% daily returns.
+- **Rule A (l, m):** on Train, Sharpe above (a) **and** t ≥ 2 **and** Sharpe above (a) in at least 2 of 2021, 2022 and 2023.
+- **Rule B (f, g, d, n, k):** on Train, a smaller worst drawdown than (a) **and** a smaller worst 1% of days **and** t above −1.
+
+**Final version**
+- All passing versions together, applied in this order: helper score → coin filters → lists → weights → brake → stop. If both helpers pass, the blend is 0.6 / 0.2 / 0.2.
+- The combination must pass every rule that its parts passed. Otherwise the final version is the single passer with the highest Train Sharpe.
+- If nothing passes, today's version stays.
+
 ### Stages 1-4: draft plan (written before the owner chose to ignore costs; to be redone after stage 0b)
 
 Each stage is compared with the best version so far, starting from (a), today's version.
