@@ -21,7 +21,8 @@ A101_055 = -1 * correlation(rank((close - ts_min(low, 12)) / (ts_max(high, 12) -
    - About once every year or two, for months at a time, the pumps keep going instead of fading. Before costs that gives drawdowns of 17-24% (2024, 2025-10 to 2026-01, 2026-04 to 06).
    - The worst single days are short squeezes: one shorted coin jumps +50% to +120% in a day.
    - No market condition we checked predicts these periods.
-4. **Simple risk filters do not fix it.** Leaving out wild or less-traded coins, a stop-loss, a drawdown brake or a helper alpha all failed (stage 1). The coins that hurt in bad periods are the same coins that pay in good ones.
+4. **No change found so far fixes the bad periods.** Stage 1's filters and stage 2's trend guard, momentum book and longer holding all helped in the bad windows but cost money in normal times. Only volatility scaling passed: same return, slightly less risk.
+   Earlier note: **simple risk filters do not fix it.** Leaving out wild or less-traded coins, a stop-loss, a drawdown brake or a helper alpha all failed (stage 1). The coins that hurt in bad periods are the same coins that pay in good ones.
 5. **Costs decide whether it makes money.**
    - The strategy trades 79% of the account every day, so each 1 bp of cost per trade costs about 2.9% a year.
    - With Binance market orders it keeps about +4% a year. With mostly limit orders, +17-23%. Break-even is 9.7 bp per dollar traded.
@@ -63,6 +64,7 @@ mkdir -p data && cp ../A101_055-main/data/*.csv.gz data/
 | `experiment.py` | Stage 1: tests each change against today's version (writes `results/stage1/`) |
 | `cost_scenarios.py` | Today's version re-priced under Binance fees (writes `results/costs/`) |
 | `stage0c.py` | Stage 0c: why the bad windows happened (writes `results/stage0c/`) |
+| `stage2.py` | Stage 2: trend guard, momentum book, holding longer, volatility scaling (writes `results/stage2/`) |
 | `baseline/` | The original backtest's summary, daily results, a live list, and data checksums |
 | `results/` | Tables from each stage (kept in git) |
 
@@ -531,6 +533,65 @@ These ideas come from stage 0c and the literature scan, so they were born from b
 - Passing versions are combined in this order: trend guard → overlapping baskets → momentum book → volatility scaling.
 - The combination must pass every rule its parts passed. Otherwise the final version is the single passer with the highest Train Sharpe.
 - If nothing passes, today's version stays.
+
+#### Stage 2 results (run 2026-10-27)
+
+- Version (a) reproduced the original backtest on all 2,036 days.
+- Files: `results/stage2/` (`judged.csv`, `information.csv`, `after_costs.csv`, `daily_gross.csv`, `versions.png`).
+
+**Judged on 2021-03-29 to 2023-12-31, before costs**
+
+| | Change | Rule | Sharpe | bp/day | Worst drawdown | Worst 1% of days | vs (a), bp/day (t) | Years better | Turnover | Verdict |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| (a) | today's version | - | 2.34 | 10.5 | −10.9% | −2.91% | - | - | 79% | yardstick |
+| (t1) | trend guard on shorts | A | 1.98 | 7.8 | −11.5% | −2.31% | −2.7 (−1.61) | 0 | 80% | fail |
+| (t2) | trend guard, both sides | A | 2.04 | 8.4 | −11.4% | −2.56% | −2.0 (−0.90) | 1 | 81% | fail |
+| (s) | 75% A101_055 + 25% momentum book | B | 2.21 | 7.9 | **−8.0%** | **−1.89%** | −2.6 (−1.70) | 1 | 67% | fail: t above −1 |
+| (c) | 3 overlapping baskets | A | 1.86 | 6.9 | −11.0% | −2.14% | −3.6 (−2.22) | 1 | 46% | fail |
+| (v) | scaled by its own volatility | B | **2.47** | 12.0 | −10.75% | −2.69% | +1.5 (2.08) | 2 | 92% | **PASS** |
+
+**By the declared rule, (v) is the final version.**
+
+![Stage 2: each change against today's version](results/stage2/versions.png)
+
+**Honesty check on (v)** (computed after the verdict; it does not change it):
+- In 2021-2023, (v) held 1.16x as much money as (a) on average: it was at the 1.5x cap on 20% of days.
+- So its extra +1.5 bp a day comes from holding more, not from better timing.
+- Divided by its average size, it earns the same as (a) (−0.1 bp a day, t −0.21), with a smaller worst drawdown (−9.3% vs −10.9%) and smaller worst 1% of days (−2.32% vs −2.91%).
+- **(v) is the same return with less risk, not extra skill.** In 2024-2026 it held only 0.80x on average (at the 0.5x floor on 17% of days), so it gave back the lead when the strategy recovered in 2026.
+- This is the 12th try across stages 1 and 2, so luck cannot be ruled out. New days are the real test.
+
+**Information only**
+
+Before costs, difference from (a) in bp a day:
+
+| | 2024 | 2025-26 | Box 1 | Box 2 | Dip 3 |
+| --- | --- | --- | --- | --- | --- |
+| (t1) trend guard, shorts | +1.9 | −0.1 | +2.6 | +8.0 | +30.3 |
+| (t2) trend guard, both | +5.0 | −1.5 | +4.3 | +8.7 | +27.8 |
+| (s) momentum book | +2.6 | +0.6 | +2.9 | +6.8 | +12.1 |
+| (c) overlapping baskets | +0.2 | −6.4 | +2.9 | +6.5 | +24.0 |
+| (v) own-volatility scaling | +0.8 | −2.1 | +1.0 | +5.2 | +19.1 |
+
+After costs, funding included:
+
+| Sharpe (a year) | Train, 3.5 bp | Train, 7.5 bp | 2024-26, 3.5 bp | 2024-26, 7.5 bp |
+| --- | --- | --- | --- | --- |
+| (a) | 1.71 (+31%) | 1.01 (+16%) | 0.31 (+5%) | −0.15 (−7%) |
+| (t1) | 1.38 (+21%) | 0.57 (+7%) | 0.79 (+16%) | 0.24 (+3%) |
+| (t2) | 1.42 (+23%) | 0.65 (+9%) | 0.72 (+14%) | 0.18 (+2%) |
+| (s) | 1.65 (+23%) | 0.91 (+12%) | **1.04 (+21%)** | **0.57 (+10%)** |
+| (c) | 1.45 (+21%) | 0.95 (+13%) | −0.14 (−5%) | −0.48 (−11%) |
+| (v) | 1.77 (+35%) | 1.01 (+18%) | 0.49 (+7%) | −0.03 (−2%) |
+
+**What it shows**
+- **Volatility scaling (v) is the only version that passed.** It lowers risk at the same return. It does not fix the bad windows: Box 1 and Box 2 Sharpe stay around −1.8.
+- **Every change helped in all three bad windows but cost money in 2021-2023.** This is the trade-off seen in stage 1. Guarding against runs means giving up the profit from runs that fade, which is the normal case.
+- **The momentum book (s) is the most interesting failure.**
+  - It cut the 2021-2023 drawdown from −10.9% to −8.0% and the worst days from −2.91% to −1.89%, and it helped in every bad window.
+  - After costs it was the best version in 2024-2026.
+  - But it gave up 2.6 bp a day in 2021-2023 (t −1.70), so it fails Rule B. By rule 7, the rules are not loosened; it can only be judged on new days.
+- **Holding longer (c) does not pay, even after costs.** Averaging three days' lists loses more edge than it saves in fees.
 
 ### Stages 1-4: draft plan (written before the owner chose to ignore costs; to be redone after stage 0b)
 
