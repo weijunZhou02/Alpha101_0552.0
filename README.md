@@ -8,6 +8,34 @@ A101_055 = -1 * correlation(rank((close - ts_min(low, 12)) / (ts_max(high, 12) -
                             rank(volume), 6)
 ```
 
+## Where things stand (summary, 2026-10-27)
+
+![A101_055 backtest under Binance fees](results/costs/costs.png)
+
+**What is clear now**
+1. **The signal is real before costs.**
+   - Next-day rank IC is +0.038 (t 13.6).
+   - Before costs and funding, the backtest makes +34.5% a year (Sharpe 1.5) over 2021-03 to 2026-10.
+2. **What the edge is.** A101_055 shorts coins that pushed to the top of their 12-day range on a rush of volume, and buys the opposite. Normally those pumps fade the next day. That fading is most of the profit.
+3. **Why it has bad periods.**
+   - About once every year or two, for months at a time, the pumps keep going instead of fading. Before costs that gives drawdowns of 17-24% (2024, 2025-10 to 2026-01, 2026-04 to 06).
+   - The worst single days are short squeezes: one shorted coin jumps +50% to +120% in a day.
+   - No market condition we checked predicts these periods.
+4. **Simple risk filters do not fix it.** Leaving out wild or less-traded coins, a stop-loss, a drawdown brake or a helper alpha all failed (stage 1). The coins that hurt in bad periods are the same coins that pay in good ones.
+5. **Costs decide whether it makes money.**
+   - The strategy trades 79% of the account every day, so each 1 bp of cost per trade costs about 2.9% a year.
+   - With Binance market orders it keeps about +4% a year. With mostly limit orders, +17-23%. Break-even is 9.7 bp per dollar traded.
+6. **The risk is bigger than 2021-2023 suggests.** Plan for drawdowns of 20-30% before costs and 30-45% after costs.
+
+**Not solved yet**
+- How to avoid the bad periods. Nothing found so far.
+- How many limit orders would really fill, and what slippage really is. One paper-trading day measured 3 bp.
+
+**Next**
+1. Measure real costs: daily paper trading for slippage, and limit orders on the demo account for fill rates.
+2. Test "trade less" versions after costs (3-day score average, overlapping baskets). The signal fades slowly, so this could cut costs without losing much edge.
+3. Set the position size so that a 30-45% drawdown can be survived.
+
 ## Where it came from
 
 - `a101_055.py`, `backtest.py` and `get_history.py` are unchanged copies from the A101_055 repo (`github.com/weijunZhou02/A101_055`, commit `f0cce0a`, 2026-10-26).
@@ -342,6 +370,8 @@ Helper values come from the main Alpha-mining project's alpha engine (`make_help
 
 **Nothing passed, so today's version stays.**
 
+![Stage 1: each change against today's version](results/stage1/versions.png)
+
 **Information only** (already seen; never used to choose). Difference from (a), bp a day:
 
 | | 2024 | 2025-26 | Box 1 | Box 2 | Dip 3 |
@@ -370,6 +400,8 @@ Helper values come from the main Alpha-mining project's alpha engine (`make_help
 - Slippage of 3 bp is what the paper account measured on its first day.
 - Funding is kept in every row except the first.
 - Files: `results/costs/scenarios.csv`, `results/costs/costs.png`.
+
+![A101_055 backtest under Binance fees](results/costs/costs.png)
 
 Turnover is 79% of equity a day, so **each 1 bp of cost per dollar traded costs about 2.9% a year**. Break-even is 9.7 bp per dollar traded, funding included.
 
