@@ -593,6 +593,21 @@ After costs, funding included:
   - But it gave up 2.6 bp a day in 2021-2023 (t −1.70), so it fails Rule B. By rule 7, the rules are not loosened; it can only be judged on new days.
 - **Holding longer (c) does not pay, even after costs.** Averaging three days' lists loses more edge than it saves in fees.
 
+**Owner's decision (2026-10-27):** the momentum book (s) failed, so it is dropped.
+
+**(a) and (v) by year, before costs.** In the chart, the (v) line falls in 2026. That line is (v) *minus* (a), so it shows (v) earning less than (a), not losing money.
+
+| | 2021 | 2022 | 2023 | 2024 | 2025 | 2026 (to Oct) |
+| --- | --- | --- | --- | --- | --- | --- |
+| (a) before costs | +50% | +29% | +43% | −13% | +44% | +50% |
+| (v) before costs | +53% | +40% | +49% | −10% | +51% | +29% |
+| (v) average size | 0.97x | 1.29x | 1.18x | 0.91x | 0.88x | **0.56x** |
+| Sharpe (a) / (v) | 2.60 / 2.88 | 1.91 / 2.01 | 2.64 / 2.62 | −0.66 / −0.54 | 1.71 / 2.38 | 1.70 / 1.83 |
+
+- **The alpha still works in 2025-2026.** Before costs these were among its best years (Sharpe about 1.7). 2024 was the weak year.
+- **Why (v) fell behind in 2026:** after the volatile windows of late 2025 and spring 2026, (v) cut its size to about 0.56x. It then caught only part of the 2026 recovery, though with a slightly higher Sharpe.
+- That is how volatility scaling works: it protects after a volatile spell (second half of 2025: (a) −3.1%, (v) +2.8%) and pays for it by missing part of the rebound.
+
 ### Stages 1-4: draft plan (written before the owner chose to ignore costs; to be redone after stage 0b)
 
 Each stage is compared with the best version so far, starting from (a), today's version.
