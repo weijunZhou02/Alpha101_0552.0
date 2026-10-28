@@ -1,0 +1,1 @@
+(p10) passes and has the highest Sharpe after costs: it is the final version.

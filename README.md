@@ -73,6 +73,8 @@ mkdir -p data && cp ../A101_055-main/data/*.csv.gz data/
 | `stage3_blend.py` | Stage 3 step 5: blends of A101_055 with the helpers, judged against (v) after costs (writes `results/stage3/blend_*`) |
 | `make_broad.py` | Exports the 158 stage 3b candidates (main project's broad list) for 2021-2023 only (run with the main project's Python) |
 | `screen_money.py` | Stage 3b money screen: does an alpha pick A101_055's best 10 of 16, in money? (writes `results/stage3b/`) |
+| `make_shortlist_3b.py` | Exports the two stage 3b shortlisted helpers for all years (run with the main project's Python) |
+| `stage3b_portfolio.py` | Stage 3b step A2: helpers keep A101_055's best 10 of 16, judged against (v) after costs (writes `results/stage3b/portfolio_*`) |
 | `baseline/` | The original backtest's summary, daily results, a live list, and data checksums |
 | `results/` | Tables from each stage (kept in git) |
 
@@ -908,6 +910,53 @@ For the information years, `make_shortlist_3b.py` exports the two helpers for al
 **If one passes:** a Forward Test on new days next to (v). For live trading, the script would also need Binance's perp premium data.
 
 Script: `stage3b_portfolio.py`. Results: `results/stage3b/portfolio_*`.
+
+#### Stage 3b, step A2 results (run 2026-10-28)
+
+`make_shortlist_3b.py` exported the two helpers for all years. Its 2021-2023 values match the screening file (relative gap 4e-6). The helper data ends 2026-10-21, so on the last 3 days every version keeps all 16. A built-in check confirmed that today's 16 + 16 book, run through the same script, reproduces (v) exactly.
+
+**Judged against (v), after costs (3.5 bp, funding included), 2021-03-29 to 2023-12-31**
+
+| | Sharpe after costs | (v) | vs (v), bp/day (t) | Years better | Worst drawdown | Turnover | Sharpe before costs | Verdict |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **(p10)** premium keeps best 10 + 10 | **2.84** | 1.77 | +8.6 (3.80) | 3 | −10.5% | 134% | 3.41 | **PASS, final** |
+| (p16) half 16 + 16, half (p10) | 2.53 | 1.77 | +4.5 (3.90) | 3 | −10.2% | 112% | 3.19 | PASS |
+| (i10) IMIN5 keeps best 10 + 10 | 2.26 | 1.77 | +6.4 (2.84) | 3 | −17.7% | 114% | 2.94 | PASS |
+| (i16) half 16 + 16, half (i10) | 2.13 | 1.77 | +3.2 (2.79) | 3 | −13.3% | 103% | 2.85 | PASS |
+| (pi10) both helpers keep best 10 + 10 | 2.68 | 1.77 | +8.1 (3.66) | 3 | −12.7% | 131% | 3.29 | PASS |
+| *(a10) A101_055 keeps its own top 10 (information)* | *1.74* | *1.77* | *+2.5 (1.14)* | *1* | *−23.8%* | *106%* | *2.38* | *not judged* |
+
+(v) itself trades 92% a day in this period, its worst drawdown is −11.2%, and its worst day is −4.2% (−5.8% for (p10)).
+
+**By the declared rule, all five pass and (p10) is the final version.** It goes to the Forward Test next to (v).
+
+![Stage 3b A2 against (v)](results/stage3b/portfolio_after_costs.png)
+
+**But the information years say the gain had almost disappeared by 2024** (`portfolio_vs_v_by_period.csv`):
+
+| Gain over (v), bp/day (t) | 2021-23 before costs | 2021-23 after costs | 2024-26 before costs | 2024-26 after costs | Turnover 2024-26 ((v): 63%) |
+| --- | --- | --- | --- | --- | --- |
+| (p10) | +10.1 (4.45) | +8.6 (3.80) | +1.0 (0.40) | −0.2 (−0.08) | 95% |
+| (p16) | +5.2 (4.52) | +4.5 (3.90) | +0.7 (0.55) | +0.1 (0.07) | 80% |
+| (i10) | +7.2 (3.18) | +6.4 (2.84) | +0.6 (0.29) | +0.0 (0.01) | 80% |
+| (i16) | +3.5 (3.12) | +3.2 (2.79) | +0.3 (0.32) | +0.0 (0.04) | 71% |
+| (pi10) | +9.4 (4.28) | +8.1 (3.66) | +0.9 (0.40) | −0.1 (−0.06) | 92% |
+
+Over 2024-2026 at 3.5 bp, (p10) made +16.8% against +22.1% for (v), and it fell further in Drawdown 2 (−27.4% vs −18.0%). At 7.5 bp: −21.1% against −5.7%.
+
+**The premium helper faded year by year** (kept 10 minus dropped 6 inside the picks, bp/day, the screen's method; information, `portfolio_helper_by_year.csv`):
+
+| | 2021 | 2022 | 2023 | 2024 | 2025 | 2026 |
+| --- | --- | --- | --- | --- | --- | --- |
+| CRYPTO_HMRW_PREMIUM | +36.1 | +26.0 | +12.3 | +10.3 | +4.6 | −12.0 |
+| Q158_IMIN5 | +32.7 | +14.9 | +11.5 | −2.6 | +7.9 | +18.1 |
+
+**What it shows**
+- **Same days to pick and to judge.** The screen chose these two helpers out of 158 because they did best on 2021-2023, and step A2 judged them on the same days. So the A2 pass is partly the screen's own luck counted again. The t of 3.80 overstates how sure we can be.
+- **The premium's edge was already shrinking inside 2021-2023** (36 → 26 → 12) and kept shrinking after. Fading by year is a warning sign, not a regime break that started in 2024.
+- **The pass rests on 2021-2022.** Re-ranking adds 30-40 points of turnover a day (about half as much trading again), and that cost doesn't shrink when the edge does. After 2023 the extra price edge was too small to pay for it.
+- **Rule 7: the information years cannot overturn the rule.** (p10) stays the rule's final version. Only the Forward Test can confirm or reject it.
+- **How long the Forward Test needs.** In 2021-2023 the daily gain over (v) had a spread of about 72 bp, so even a true +8.6 bp/day would need about 280 trade days to reach t 2. A true gain near +1 bp/day, as in 2024-2026, could never be confirmed. A 90-day checkpoint can only catch a disaster.
 
 ### Parked plans (2026-10-27, to run before trading real money)
 
