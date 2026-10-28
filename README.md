@@ -71,6 +71,8 @@ mkdir -p data && cp ../A101_055-main/data/*.csv.gz data/
 | `screen.py` | Stage 3 screen: can an existing alpha tell A101_055's good picks from bad ones? (writes `results/stage3/`) |
 | `make_shortlist_values.py` | Exports the two shortlisted helpers for all years (run with the main project's Python) |
 | `stage3_blend.py` | Stage 3 step 5: blends of A101_055 with the helpers, judged against (v) after costs (writes `results/stage3/blend_*`) |
+| `make_broad.py` | Exports the 158 stage 3b candidates (main project's broad list) for 2021-2023 only (run with the main project's Python) |
+| `screen_money.py` | Stage 3b money screen: does an alpha pick A101_055's best 10 of 16, in money? (writes `results/stage3b/`) |
 | `baseline/` | The original backtest's summary, daily results, a live list, and data checksums |
 | `results/` | Tables from each stage (kept in git) |
 
@@ -830,6 +832,45 @@ Step A asks, with a **money** test this time: does any existing alpha pick 10 co
 **If nothing passes:** the existing-alpha path stops for good. The next option is the machine-learning re-ranker (step B), which needs its own approval, including the choice of judging option (A: choose on 2021-2023; B: train on all history, judge only on new days).
 
 **Step A2** (the portfolio test of the shortlisted helpers: (r1) best 10 + 10, (r2) keep 16 + 16 and tilt weight to the helper's favourites, both with (v) scaling, Rule A after costs against (v)) gets its own declaration before it runs.
+
+#### Stage 3b results (run 2026-10-28)
+
+The screen covered 1,008 trade days (2021-03-29 to 2023-12-31). `make_broad.py` exported the 158 candidates up to 2023-12-31 (main project commit fb06995). Files: `results/stage3b/screen_money.csv` (all 158 plus the reference row), `shortlist.csv`, `daily_pooled_spread.csv.gz`, `screen_money.png`.
+
+![Stage 3b money screen](results/stage3b/screen_money.png)
+
+**3 of the 158 candidates passed the money rule.** Kept 10 minus dropped 6, average bet return per day, funding included:
+
+| Alpha | What it measures | Spread, bp/day (t) | 2021 / 2022 / 2023 | BUY side (t) | SHORT side (t) | Rank IC t inside the picks | Shortlisted |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| **CRYPTO_HMRW_PREMIUM** | Perp price vs spot price. Keeps the BUY coins whose perp trades cheapest, and the SHORT coins whose perp trades dearest | **+23.8 (4.30)** | +36.1 / +26.0 / +12.3 | +19.4 (2.72) | +28.0 (3.37) | 3.96 | **yes** |
+| **Q158_IMIN5** | How recently the coin made its 5-day low. Keeps the BUY coins that just made a new low, and the SHORT coins whose low is oldest | **+18.6 (3.51)** | +32.7 / +14.9 / +11.5 | +17.2 (2.37) | +19.8 (2.58) | 5.45 | **yes** |
+| Q158_CNTP5 | Share of up days in the last 5 | +17.5 (3.10) | +27.0 / +8.6 / +19.0 | +5.6 (0.77) | +29.6 (3.65) | 5.43 | no: same family as Q158_IMIN5 |
+| *Reference: A101_055 keeping its own top 10* | | *+9.4 (1.82)* | *+33.6 / +6.4 / −6.1* | | | | *not a candidate* |
+
+**What it shows**
+- **Ranking skill tells nothing about money here.**
+  - 92 of the 158 candidates rank A101_055's picks well (rank IC t ≥ 3), but only 3 make money by choosing among them.
+  - Across candidates, rank IC t and money t correlate −0.01 (the chart is a flat cloud).
+- **Removing coins is not the same as blending.** In stage 1, the perp premium blended across all 80 coins (version (l)) gave +2.3 bp/day before costs, with t 0.97. Used only to drop coins from A101_055's lists, it gives the strongest money result of the 158.
+- **Simply keeping A101_055's own 10 strongest picks doesn't pass** (t 1.82, negative in 2023).
+- **Luck check.** With 158 tries, pure luck would put fewer than 1 above t 3. 13 candidates have t ≥ 2 against about 4 by luck, and only 2 have t ≤ −2. But the candidates are related to each other, so this is only a rough check.
+
+**Information (computed after the rule, not used to choose)**
+
+| | Spread, bp/day | Price part | Funding part | Ties shared evenly, bp/day (t) | Distinct values among the 16 | Median day, bp | 10 + 10 book gain, before costs |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| CRYPTO_HMRW_PREMIUM | 23.8 | 20.2 | 3.6 | 21.3 (3.94) | 13.0 | +14.0 | +8.9 bp/day |
+| Q158_IMIN5 | 18.6 | 18.8 | −0.2 | **8.2 (2.13)** | **2.8** | +13.1 | +7.0 |
+| Q158_CNTP5 | 17.5 | 17.6 | −0.1 | 9.1 (2.02) | 3.5 | +13.2 | +6.5 |
+| A101_055 own top 10 | 9.4 | 9.5 | −0.1 | 9.3 (1.80) | 15.9 | +3.2 | +3.5 |
+
+- **The perp premium's edge is mostly price, not funding** (20.2 of 23.8 bp/day). It holds up when tied coins share the cut evenly, and it isn't driven by a few big days (the median day is +14 bp).
+- **Q158_IMIN5 takes only about 3 different values among 16 coins.** So most of its keep/drop decisions are ties, and the declared rule settles ties by A101_055's own order. If ties share the cut evenly instead, its spread halves to 8.2 bp/day (t 2.13). About half of its pass comes from A101_055's own top-10 effect working together with it.
+- The two shortlisted helpers' daily spreads are unrelated (correlation 0.03).
+- The 10 + 10 gain before costs is 0.375 × the spread. Re-ranking also adds trading, and costs are not counted here. Step A2 is the money test with costs.
+
+**Next:** step A2, the portfolio test of CRYPTO_HMRW_PREMIUM and Q158_IMIN5 against (v) after costs. It needs its own declaration.
 
 ### Parked plans (2026-10-27, to run before trading real money)
 

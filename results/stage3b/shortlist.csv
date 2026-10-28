@@ -1,0 +1,3 @@
+alpha,family,spread bp/day,spread t,spread 2021,spread 2022,spread 2023,BUY spread bp,BUY t,SHORT spread bp,SHORT t,10+10 gain bp/day,price part bp,funding part bp,ties shared bp,ties shared t,distinct values in 16,median day bp,inside rank IC,inside IC t,corr with A101_055,days,passes rule
+CRYPTO_HMRW_PREMIUM,Carry / derivatives,23.7892,4.29756,36.0632,25.9712,12.2587,19.4015,2.72353,28.0075,3.37026,8.92094,20.2183,3.57085,21.2583,3.94018,13.0382,14.034,0.0246867,3.9554,-0.00103849,1008,True
+Q158_IMIN5,Technical indicator,18.6018,3.50803,32.6954,14.933,11.5363,17.157,2.36783,19.7577,2.58484,6.97567,18.8284,-0.226554,8.15885,2.12919,2.81448,13.071,0.0391258,5.45287,0.0146292,1008,True
