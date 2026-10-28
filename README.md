@@ -981,6 +981,90 @@ The owner asked to see the versions from mid-2023 onwards. `view_from_2023h2.py`
 - **Before costs, (p10) is far behind** (+14% a year against +27%). It only keeps up after costs because its shorts collect more funding.
 - **At 7.5 bp only (v) stays above zero.** The extra trading of the re-ranked versions hurts most when costs are high.
 
+### Stage 4: machine-learning re-ranker (step B, declared 2026-10-28)
+
+**Idea (the owner's):** A101_055 makes the first cut. A model then scores each candidate coin ("how much money will this bet make tomorrow, compared with the other candidates?"), and the strategy keeps the best 10 per side. Ideas taken from the papers the owner shared:
+- AlphaForge: refit simple weights on recent results (version D16); train only on outcomes already known.
+- AlphaGen: no pre-filtering of inputs, and a buffer that limits daily changes.
+- FactorMiner: coins move together, so judge each coin against the other candidates that day.
+- Vu et al.: all settings fixed in advance, every version reported.
+
+```
+80 coins ─ A101_055 ─▶ candidates per side (its 16, or its top 30)
+                              │
+                  model scores each candidate
+                              │
+                       keep the best 10 per side
+```
+
+**Candidates per side**
+- "16" versions: A101_055's BUY and SHORT lists (16 coins, more when tied).
+- "30" versions: A101_055's 30 highest and 30 lowest scores, with the same tie rule as the lists. If the two would overlap, both shrink to half of the scored coins.
+
+**Target (used only for training):** the candidate's bet return on the next day (the next-day return in the bet's direction, plus funding) **minus the average bet return of that day's candidates on the same side**. Plain average, no trimming: big jumps count fully.
+
+**Inputs (21, fixed now).** Coin inputs become the day's percentile rank among the 80 coins, centred on 0 (missing = 0):
+
+| # | Input |
+| --- | --- |
+| 1 | A101_055 score |
+| 2 | A101_055's rank inside the side's candidates, in the bet's direction (0 to 1, strongest = 1) |
+| 3-7 | Return over 1, 3, 6, 14 and 30 days |
+| 8 | Today's trading value / its 30-day average |
+| 9 | 6-day average trading value / its 30-day average |
+| 10 | 30-day volatility of daily returns |
+| 11 | Biggest one-day rise in the last 30 days |
+| 12 | Days since the 30-day high |
+| 13 | Funding on the signal day |
+| 14 | 7-day average funding |
+| 15 | Perp premium (the main project's CRYPTO_HMRW_PREMIUM input) |
+| 16 | 30-day average trading value |
+| 17 | Days since listing (counted from the first day in the data, 2020-01-01 at the earliest) |
+| 18-20 | Day-level, used by the tree models only: BTC 7-day return; the 80 coins' average 7-day return; market volatility (30-day volatility of the 80 coins' equal-weight daily return) |
+| 21 | Side (BUY or SHORT), tree models only |
+
+**Models (settings fixed now, no tuning)**
+- **Linear (ridge):** one model per side on inputs 1-17, standardised on the training rows. Penalty = 10% of the number of training rows.
+- **Boosted trees** (scikit-learn `HistGradientBoostingRegressor`): one model for both sides on inputs 1-21. Squared error, depth 3, learning rate 0.05, 300 rounds, at least 200 rows per leaf, L2 penalty 1.0, no early stopping, random_state 0.
+- **Dynamic (AlphaForge-style):** each month and each side, for inputs 1-17 compute the average daily correlation with the target inside the side's candidates over the last 182 days. Keep the 8 with the largest absolute average, and fit the linear model on those 8 using only those 182 days.
+
+**Walk-forward training:** every model is refit on the 1st of each month (UTC), using every candidate row whose trade day is before that date. The dynamic version uses only the last 182 days. The first fit is on 2021-10-01, using trade days 2021-03-29 to 2021-09-30. Before 2021-10-01 every version holds today's 16 + 16, the same as (v).
+
+**Versions**
+
+| Version | Model | Chooses 10 from |
+| --- | --- | --- |
+| (R16) | Linear | A101_055's 16 |
+| (T16) | Boosted trees | A101_055's 16 |
+| (D16) | Dynamic (AlphaForge-style) | A101_055's 16 |
+| (R30) | Linear | A101_055's top 30 |
+| (T30) | Boosted trees | A101_055's top 30 |
+| (T16+) | Boosted trees, inputs 1-21 plus the 158 broad-list alphas (each as the day's centred percentile rank among the 80 coins, missing = 0; no pre-selection) | A101_055's 16 |
+
+**From score to portfolio**
+- On each side, candidates are ordered by the model's score (higher = better bet). Ties go to A101_055's order.
+- **Buffer rule:** a coin held yesterday on the same side stays if it is still a candidate and in the model's best 12. Free places go to the best-scored other candidates until 10 are held.
+- Equal weights, each side 50%, and (v)'s volatility scaling, computed from each version's own unscaled results.
+
+**Gate 1 (Rule A, after costs).** 3.5 bp per dollar traded, funding included, trade days **2021-10-01 to 2023-12-31**, against (v) on the same days. To pass, a version needs all three:
+- a higher Sharpe than (v);
+- t ≥ 2 on the day-by-day difference;
+- a higher Sharpe than (v) in 2022 and in 2023.
+
+**Gate 2 (new: can only reject).** Over trade days **2024-01-01 to 2026-10-24**, after costs at 3.5 bp, the day-by-day difference from (v) must have t > −1.
+- Why: the models are trained walk-forward, so their 2024-2026 predictions come from past data only.
+- The limit: some inputs (funding, jump risk) were inspired by studying those years (rule 7), so this gate is weaker than a Forward Test.
+- Gate 2 is never used to choose between versions.
+
+**Final version:** among versions passing both gates, the highest Sharpe after costs in the Gate 1 window. If none passes, (v) stays. A survivor goes to the Forward Test.
+
+**Information only:** before costs (no fees, no funding), 7.5 bp, the bad windows (Box 1, Box 2, Dip 3, Drawdown 1 and 2), turnover, worst day and drawdown, kept-minus-dropped money by year, the linear weights, and the dynamic version's picks by year.
+
+**Data and code**
+- `make_ml_inputs.py` (main project's Python) exports the 158 broad-list alphas for all years to `data/broad_all_years.parquet`. Its 2021-2023 part must equal the screening file.
+- `stage4_ml.py` builds the inputs, trains walk-forward and backtests. Results go to `results/stage4/`.
+- `requirements.txt` gains scikit-learn 1.9.1 and pyarrow 26.0.0.
+
 ### Parked plans (2026-10-27, to run before trading real money)
 
 Each plan has a short name, so it can be started later by name.

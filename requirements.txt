@@ -2,3 +2,5 @@
 numpy==2.3.3
 pandas==3.0.2
 matplotlib==3.10.8  # backtest chart only
+scikit-learn==1.9.1  # stage 4 models
+pyarrow==26.0.0  # stage 4 input file (parquet)
