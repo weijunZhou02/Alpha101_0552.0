@@ -154,7 +154,8 @@ def main():
         row = {}
         for label, (start, end) in {"2021-23": ex.JUDGE, "2024-26": s3.WINDOWS["2024-26"]}.items():
             for cost in (0.0, s3.COST):
-                diff = (s3.net(d, cost) - s3.net(results["v"], cost)).loc[start:end]
+                ret = (lambda x: x["gross"]) if cost == 0 else (lambda x: s3.net(x, s3.COST))
+                diff = (ret(d) - ret(results["v"])).loc[start:end]       # before costs = no fees, no funding
                 tag = "before costs" if cost == 0 else f"at {cost:g} bp"
                 row[f"{label} vs (v) {tag}, bp/day"] = diff.mean() * 1e4
                 row[f"{label} t {tag}"] = diff.mean() / diff.std() * np.sqrt(len(diff)) if n != "v" else np.nan

@@ -75,6 +75,7 @@ mkdir -p data && cp ../A101_055-main/data/*.csv.gz data/
 | `screen_money.py` | Stage 3b money screen: does an alpha pick A101_055's best 10 of 16, in money? (writes `results/stage3b/`) |
 | `make_shortlist_3b.py` | Exports the two stage 3b shortlisted helpers for all years (run with the main project's Python) |
 | `stage3b_portfolio.py` | Stage 3b step A2: helpers keep A101_055's best 10 of 16, judged against (v) after costs (writes `results/stage3b/portfolio_*`) |
+| `view_from_2023h2.py` | Information view: the A2 versions from 2023-07-01, each restarted at $10,000 (writes `results/stage3b/from_2023h2.*`) |
 | `baseline/` | The original backtest's summary, daily results, a live list, and data checksums |
 | `results/` | Tables from each stage (kept in git) |
 
@@ -932,15 +933,17 @@ Script: `stage3b_portfolio.py`. Results: `results/stage3b/portfolio_*`.
 
 ![Stage 3b A2 against (v)](results/stage3b/portfolio_after_costs.png)
 
-**But the information years say the gain had almost disappeared by 2024** (`portfolio_vs_v_by_period.csv`):
+**But the information years say the gain had disappeared by 2024** (`portfolio_vs_v_by_period.csv`):
 
 | Gain over (v), bp/day (t) | 2021-23 before costs | 2021-23 after costs | 2024-26 before costs | 2024-26 after costs | Turnover 2024-26 ((v): 63%) |
 | --- | --- | --- | --- | --- | --- |
-| (p10) | +10.1 (4.45) | +8.6 (3.80) | +1.0 (0.40) | −0.2 (−0.08) | 95% |
-| (p16) | +5.2 (4.52) | +4.5 (3.90) | +0.7 (0.55) | +0.1 (0.07) | 80% |
-| (i10) | +7.2 (3.18) | +6.4 (2.84) | +0.6 (0.29) | +0.0 (0.01) | 80% |
-| (i16) | +3.5 (3.12) | +3.2 (2.79) | +0.3 (0.32) | +0.0 (0.04) | 71% |
-| (pi10) | +9.4 (4.28) | +8.1 (3.66) | +0.9 (0.40) | −0.1 (−0.06) | 92% |
+| (p10) | +8.6 (3.83) | +8.6 (3.80) | **−3.0 (−1.25)** | −0.2 (−0.08) | 95% |
+| (p16) | +4.5 (3.92) | +4.5 (3.90) | −1.3 (−1.01) | +0.1 (0.07) | 80% |
+| (i10) | +7.4 (3.28) | +6.4 (2.84) | +0.5 (0.25) | +0.0 (0.01) | 80% |
+| (i16) | +3.6 (3.23) | +3.2 (2.79) | +0.3 (0.27) | +0.0 (0.04) | 71% |
+| (pi10) | +8.4 (3.83) | +8.1 (3.66) | −2.1 (−0.96) | −0.1 (−0.06) | 92% |
+
+"Before costs" = no fees and no funding, the lab's usual meaning. (A first version of this table, in commit e3f19ad, counted funding in the "before costs" columns by mistake; corrected here.) In 2024-2026, (p10)'s **price** result was 3.0 bp/day worse than (v)'s. It only caught up after costs because its shorts collected more funding: it keeps the shorts whose perp trades dearest.
 
 Over 2024-2026 at 3.5 bp, (p10) made +16.8% against +22.1% for (v), and it fell further in Drawdown 2 (−27.4% vs −18.0%). At 7.5 bp: −21.1% against −5.7%.
 
@@ -954,9 +957,29 @@ Over 2024-2026 at 3.5 bp, (p10) made +16.8% against +22.1% for (v), and it fell 
 **What it shows**
 - **Same days to pick and to judge.** The screen chose these two helpers out of 158 because they did best on 2021-2023, and step A2 judged them on the same days. So the A2 pass is partly the screen's own luck counted again. The t of 3.80 overstates how sure we can be.
 - **The premium's edge was already shrinking inside 2021-2023** (36 → 26 → 12) and kept shrinking after. Fading by year is a warning sign, not a regime break that started in 2024.
-- **The pass rests on 2021-2022.** Re-ranking adds 30-40 points of turnover a day (about half as much trading again), and that cost doesn't shrink when the edge does. After 2023 the extra price edge was too small to pay for it.
+- **The pass rests on 2021-2022.** Re-ranking adds 30-40 points of turnover a day (about half as much trading again), and that cost doesn't shrink when the edge does. After 2023 the premium helper's price edge turned negative inside the picks; only the extra funding kept (p10) level with (v).
 - **Rule 7: the information years cannot overturn the rule.** (p10) stays the rule's final version. Only the Forward Test can confirm or reject it.
-- **How long the Forward Test needs.** In 2021-2023 the daily gain over (v) had a spread of about 72 bp, so even a true +8.6 bp/day would need about 280 trade days to reach t 2. A true gain near +1 bp/day, as in 2024-2026, could never be confirmed. A 90-day checkpoint can only catch a disaster.
+- **How long the Forward Test needs.** In 2021-2023 the daily gain over (v) had a spread of about 72 bp, so even a true +8.6 bp/day would need about 280 trade days to reach t 2. A true gain near zero, as in 2024-2026 after costs, could never be confirmed. A 90-day checkpoint can only catch a disaster.
+
+#### Information view: from 2023-07-01 (2026-10-28, describes only)
+
+The owner asked to see the versions from mid-2023 onwards. `view_from_2023h2.py` uses the same daily results as step A2 (volatility scaling included) and only restarts each line at $10,000 on 2023-07-01. It ends on 2026-10-24, the last day of the frozen data. The helper data ends 2026-10-21, so on the last 3 days the helper versions keep all 16. Going up to yesterday needs the new-day download, which belongs to the Forward Test setup. Files: `results/stage3b/from_2023h2.png`, `from_2023h2.csv`.
+
+![Versions from 2023-07-01](results/stage3b/from_2023h2.png)
+
+| 2023-07-01 to 2026-10-24, per year | Before costs (no fees, no funding) | After costs, 3.5 bp | After costs, 7.5 bp | Worst drawdown at 3.5 bp |
+| --- | --- | --- | --- | --- |
+| (a) today's version | +29.5% | +8.9% | −2.8% | −30.1% |
+| **(v) working version** | +26.7% | **+11.1%** | **+0.9%** | −28.0% |
+| (p10) premium keeps best 10 + 10 | +14.3% | +10.1% | −4.8% | −30.5% |
+| (p16) half 16 + 16, half (p10) | +22.0% | +11.8% | −1.1% | −27.5% |
+| (i10) IMIN5 keeps best 10 + 10 | +30.4% | +11.1% | −1.8% | −28.7% |
+| (i16) half 16 + 16, half (i10) | +29.0% | +11.5% | −0.1% | −27.7% |
+| (pi10) both helpers keep best 10 + 10 | +15.3% | +7.5% | −6.5% | −31.7% |
+
+- **After costs at 3.5 bp, every version lands within about 1 point a year of (v)**, except (pi10). That's noise level: nothing clearly beats (v) over the last 3.3 years.
+- **Before costs, (p10) is far behind** (+14% a year against +27%). It only keeps up after costs because its shorts collect more funding.
+- **At 7.5 bp only (v) stays above zero.** The extra trading of the re-ranked versions hurts most when costs are high.
 
 ### Parked plans (2026-10-27, to run before trading real money)
 
