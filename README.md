@@ -794,6 +794,43 @@ Script: `stage3_blend.py`. Results: `results/stage3/blend_*`.
 - **Blending raised the rank IC but lowered the money.** It pulled the helpers' wild coins into A101_055's lists.
 - **Lesson for later screens:** the stage 3 shortlist rule used only rank IC. It should also have required money, for example the main project's rule of long-short t ≥ 3. That omission was a design mistake. Any future screen will include a money test.
 
+### Stage 3b: money screen inside the picks (step A, declared 2026-10-28)
+
+**Idea (the owner's):** A101_055 makes the first cut, as today (16 BUY, 16 SHORT). A second alpha then re-ranks each list and **keeps only its best 10**. Unlike the step 5 blend, the second alpha can only **remove** coins from A101_055's lists; it can never bring new coins in.
+
+```
+80 coins ─ A101_055 ─▶ 16 BUY   ─ helper re-ranks ─▶ keep best 10 BUY
+                     └▶ 16 SHORT ─ helper re-ranks ─▶ keep best 10 SHORT
+```
+
+Step A asks, with a **money** test this time: does any existing alpha pick 10 coins that earn more than the 6 it drops?
+
+**Candidates:** the main project's **broad list** (`data/eval/dedupe/broad_list.csv`): every alpha with some signal in 2021-2023, duplicates removed, all families. That is 159 alphas; A101_055 itself is taken out, leaving **158 candidates**. Each alpha's direction comes from the main project's 2021-2023 scorecard, so higher = expected to do better.
+
+**Reference row (not a candidate):** A101_055 re-ranking its own lists, i.e. keeping its 10 strongest picks per side. It shows whether simply concentrating A101_055 helps.
+
+**Data:** `make_broad.py` (run with the main project's Python) writes `data/broad_2021_2023.csv.gz`. **It stops at 2023-12-31**, so the screen cannot see later years.
+
+**Measured on trade days 2021-03-29 to 2023-12-31** (`screen_money.py`):
+1. Each day, on each side, the candidate ranks A101_055's 16 coins.
+   - BUY: keep the 10 it scores highest. SHORT: keep the 10 it scores lowest (expected to do worst).
+   - Ties are broken by A101_055's own order (stronger A101_055 signal first).
+   - A missing candidate value counts as the median of that list. If fewer than 10 of the 16 coins have a value, that side is skipped that day.
+2. **Bet return** of a coin = its next-day return (the strategy's 00:00-to-00:00 return) in the bet's direction, **plus funding** (a long pays funding when it is positive, a short receives it). It is a plain average, so big jumps count fully. No trimming.
+3. **Day value per side** = average bet return of the 10 kept − average bet return of the 6 dropped. The day's pooled value is the average of the two sides.
+   - The 10 + 10 book beats the 16 + 16 book by 6/16 = 0.375 × this spread (before costs).
+4. Also shown: each side separately, the rank IC inside the picks (the stage 3 measure) for contrast, and the daily rank correlation with A101_055.
+
+**Pass rule:** pooled spread t ≥ 3 **and** pooled spread positive in each of 2021, 2022 and 2023.
+
+**Shortlist:** the passer with the highest t. A second one only if it comes from a different family (main catalog category). At most 2.
+
+**Fixed in advance:** keep 10 of 16 (the owner's number). Other numbers (8, 12, ...) are not tried.
+
+**If nothing passes:** the existing-alpha path stops for good. The next option is the machine-learning re-ranker (step B), which needs its own approval, including the choice of judging option (A: choose on 2021-2023; B: train on all history, judge only on new days).
+
+**Step A2** (the portfolio test of the shortlisted helpers: (r1) best 10 + 10, (r2) keep 16 + 16 and tilt weight to the helper's favourites, both with (v) scaling, Rule A after costs against (v)) gets its own declaration before it runs.
+
 ### Parked plans (2026-10-27, to run before trading real money)
 
 Each plan has a short name, so it can be started later by name.
