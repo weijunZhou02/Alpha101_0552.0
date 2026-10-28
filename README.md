@@ -739,6 +739,26 @@ The screen covered 1,008 trade days (2021-03-29 to 2023-12-31). Files: `results/
 - **The helpers help most with A101_055's reversal bets** (t 12.5 and 10.8), and much less with its continuation bets (5.2 and 2.6).
 - **A warning for step 5:** both helpers push the strategy further toward "fade every move". That is exactly what failed in the bad windows, when moves kept going. Step 5 must show the bad windows as information.
 
+#### Stage 3, step 5: blend test (declared 2026-10-28)
+
+**Versions.** Scores are daily percentile ranks among the day's 80 coins. A missing helper value counts as the middle rank, and a coin without an A101_055 score stays off the lists. Then come the usual 16 + 16 lists with equal weights, and the same volatility scaling as (v), computed from each blend's own unscaled results.
+- (b1) 0.7 × A101_055 + 0.3 × Q158_MIN10
+- (b2) 0.7 × A101_055 + 0.3 × GTJA_034
+- (b3) 0.6 × A101_055 + 0.2 × Q158_MIN10 + 0.2 × GTJA_034
+
+**Yardstick:** (v), the working version.
+
+**Rule A, after costs.** 3.5 bp per dollar traded, funding included, on trade days 2021-03-29 to 2023-12-31. To pass, a blend needs all three:
+- a higher Sharpe than (v);
+- t ≥ 2 on the day-by-day difference from (v);
+- a higher Sharpe than (v) in at least 2 of 2021, 2022 and 2023.
+
+**If several blends pass,** the final version is the one with the highest Sharpe after costs on 2021-2023. If none passes, (v) stays.
+
+**Information only:** before-cost results, 7.5 bp, 2024-2026 and the bad windows. For these, `make_shortlist_values.py` exports the two helpers for all years, now that the shortlist is fixed. Its 2021-2023 values must equal the screening file.
+
+Script: `stage3_blend.py`. Results: `results/stage3/blend_*`.
+
 ### Parked plans (2026-10-27, to run before trading real money)
 
 Each plan has a short name, so it can be started later by name.
