@@ -76,6 +76,8 @@ mkdir -p data && cp ../A101_055-main/data/*.csv.gz data/
 | `make_shortlist_3b.py` | Exports the two stage 3b shortlisted helpers for all years (run with the main project's Python) |
 | `stage3b_portfolio.py` | Stage 3b step A2: helpers keep A101_055's best 10 of 16, judged against (v) after costs (writes `results/stage3b/portfolio_*`) |
 | `view_from_2023h2.py` | Information view: the A2 versions from 2023-07-01, each restarted at $10,000 (writes `results/stage3b/from_2023h2.*`) |
+| `make_ml_inputs.py` | Exports the 158 broad-list alphas for all years for stage 4 (run with the main project's Python) |
+| `stage4_ml.py` | Stage 4: machine-learning re-ranker inside A101_055's candidates, trained walk-forward, judged against (v) (writes `results/stage4/`) |
 | `baseline/` | The original backtest's summary, daily results, a live list, and data checksums |
 | `results/` | Tables from each stage (kept in git) |
 
@@ -1064,6 +1066,47 @@ The owner asked to see the versions from mid-2023 onwards. `view_from_2023h2.py`
 - `make_ml_inputs.py` (main project's Python) exports the 158 broad-list alphas for all years to `data/broad_all_years.parquet`. Its 2021-2023 part must equal the screening file.
 - `stage4_ml.py` builds the inputs, trains walk-forward and backtests. Results go to `results/stage4/`.
 - `requirements.txt` gains scikit-learn 1.9.1 and pyarrow 26.0.0.
+
+#### Stage 4 results (run 2026-10-28)
+
+`make_ml_inputs.py` exported the 158 alphas for all years. Its 2021-2023 part matches the screening file (relative gap 5e-6).
+- The run covered 162,880 coin-days: 65,274 candidate rows for the 16-coin versions and 122,224 for the 30-coin versions.
+- A built-in check confirmed that every version equals (v) before the first fit.
+- A second run gave identical results. The whole run takes about 3.5 minutes on the Mac.
+
+**Judged against (v), after costs (3.5 bp, funding included)**
+
+| | Sharpe, Gate 1 window | (v) | vs (v), bp/day (t) | Better in 2022 / 2023 | Gate 1 | 2024-26 vs (v), bp/day (t) | Gate 2 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| (R16) linear, 16 | 1.30 | 1.41 | +0.8 (0.36) | yes / no | fail | −0.1 (−0.06) | pass |
+| (T16) trees, 16 | 0.30 | 1.41 | −5.0 (−2.12) | no / no | fail | +0.1 (0.04) | pass |
+| (D16) dynamic linear, 16 | 1.41 | 1.41 | +1.5 (0.64) | yes / no | fail | −3.7 (−1.79) | fail |
+| (R30) linear, 30 | 1.51 | 1.41 | +1.5 (0.49) | yes / no | fail | −2.0 (−0.59) | pass |
+| (T30) trees, 30 | −0.31 | 1.41 | −8.9 (−2.11) | no / no | fail | +0.3 (0.08) | pass |
+| (T16+) trees + 158 alphas, 16 | 0.92 | 1.41 | −1.4 (−0.58) | yes / no | fail | −3.2 (−1.54) | fail |
+
+**No version passes Gate 1, so (v) stays the final version.** None comes close: the best t against (v) is 0.64. Both tree versions were clearly worse (t −2.1).
+
+![Stage 4 against (v)](results/stage4/after_costs.png)
+
+**Information (after costs at 3.5 bp, total return %)**
+
+| | Gate 1 window | 2024 | 2025-26 | Box 1 | Box 2 | Dip 3 | Drawdown 1 | Drawdown 2 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| (v) | +67.6 | −18.1 | +49.2 | −27.5 | −16.0 | −9.7 | −26.9 | −18.0 |
+| (R16) | +76.1 | −23.0 | +52.1 | −29.7 | −13.1 | −13.6 | −33.0 | −11.3 |
+| (T16) | +9.6 | −10.4 | +34.9 | −22.6 | −19.6 | −11.9 | −20.0 | −22.5 |
+| (D16) | +86.0 | −35.0 | +26.2 | −35.2 | −24.7 | −10.5 | −39.5 | −26.4 |
+| (R30) | +87.4 | −17.1 | +16.5 | −28.5 | −6.2 | −8.5 | −31.2 | −3.9 |
+| (T30) | −23.1 | −13.4 | +39.1 | −24.6 | −14.5 | −14.0 | −30.8 | −25.1 |
+| (T16+) | +47.0 | −21.2 | +9.7 | −29.2 | −27.4 | −8.0 | −28.3 | −29.0 |
+
+**What it shows**
+- **No model could reliably pick the better 10.** Kept minus dropped money changes sign from year to year for every version, for example (R16): −12, +11, −2, −4, +7, +1 bp/day from 2021 to 2026 (`kept_minus_dropped_by_year.csv`).
+- **The relationships keep flipping.** (R16)'s weights reverse over time. On the SHORT side, the 3-day return goes from −0.0010 in 2021 to +0.0008 in 2026, and the 6-day return from +0.0019 to −0.0006. A model trained on the past learns a pattern that has often turned around by the time it trades.
+- **Choosing from the top 30 adds jump risk.** (T30)'s worst day was −23.7% on 2022-06-07: it shorted UNFI, which rose +450% that day. UNFI was the 28th lowest A101_055 score, so it was in the wider pool but never in A101_055's own 16.
+- **The bad windows weren't fixed.** (R30) lost less in Box 2 and Drawdown 2, but it gave that back in 2026 (−12.1% against +15.3% for (v)), and it fails Gate 1. Information only.
+- **Together with stages 1, 2, 3 and 3b:** filters, guards, blends, helper alphas and now machine-learning re-rankers all fail to improve on A101_055's own lists in a way that holds up. The differences between candidates inside those lists look mostly like noise.
 
 ### Parked plans (2026-10-27, to run before trading real money)
 
