@@ -977,7 +977,7 @@ The owner asked to see the versions from mid-2023 onwards. `view_from_2023h2.py`
 | (i16) half 16 + 16, half (i10) | +29.0% | +11.5% | −0.1% | −27.7% |
 | (pi10) both helpers keep best 10 + 10 | +15.3% | +7.5% | −6.5% | −31.7% |
 
-- **After costs at 3.5 bp, every version lands within about 1 point a year of (v)**, except (pi10). That's noise level: nothing clearly beats (v) over the last 3.3 years.
+- **After costs at 3.5 bp, every re-ranked version lands within about 1 point a year of (v)**, except (pi10). That's noise level: nothing clearly beats (v) over the last 3.3 years.
 - **Before costs, (p10) is far behind** (+14% a year against +27%). It only keeps up after costs because its shorts collect more funding.
 - **At 7.5 bp only (v) stays above zero.** The extra trading of the re-ranked versions hurts most when costs are high.
 
