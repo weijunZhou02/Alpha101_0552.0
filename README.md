@@ -872,6 +872,43 @@ The screen covered 1,008 trade days (2021-03-29 to 2023-12-31). `make_broad.py` 
 
 **Next:** step A2, the portfolio test of CRYPTO_HMRW_PREMIUM and Q158_IMIN5 against (v) after costs. It needs its own declaration.
 
+#### Stage 3b, step A2: portfolio test (declared 2026-10-28)
+
+**Versions.** A101_055 makes its usual 16 + 16 lists. A helper then keeps the best 10 on each side, as in the screen:
+- BUY keeps the 10 the helper scores highest; SHORT keeps the 10 it scores lowest.
+- Ties go to the stronger A101_055 signal.
+- A missing helper value counts as the median of that list. If fewer than 10 of the 16 coins have a value, that side keeps all 16 that day.
+
+| Version | Book |
+| --- | --- |
+| (p10) | CRYPTO_HMRW_PREMIUM keeps the best 10 + 10, equal weights |
+| (p16) | Half the money in today's 16 + 16, half in (p10). A kept coin gets 2.6× the weight of a dropped one |
+| (i10) | Q158_IMIN5 keeps the best 10 + 10 |
+| (i16) | Half in today's 16 + 16, half in (i10) |
+| (pi10) | Both helpers: each one's percentile rank within the list (missing = middle), averaged; keep the best 10 + 10 by that average |
+
+Each side always holds 50% of the money, as today. **Every version gets (v)'s volatility scaling,** computed from its own unscaled results, so a riskier, more concentrated book is scaled down automatically.
+
+**Yardstick:** (v), the working version.
+
+**Rule A, after costs.** 3.5 bp per dollar traded, funding included, on trade days 2021-03-29 to 2023-12-31. To pass, a version needs all three:
+- a higher Sharpe than (v);
+- t ≥ 2 on the day-by-day difference from (v);
+- a higher Sharpe than (v) in at least 2 of 2021, 2022 and 2023.
+
+**If several pass,** the final version is the one with the highest Sharpe after costs on 2021-2023. If none passes, (v) stays.
+
+**Information only:**
+- before-cost results, 7.5 bp, 2024-2026 and the bad windows;
+- turnover, worst day and worst drawdown;
+- (a10): A101_055 keeping its own 10 strongest picks per side, with (v) scaling. Not judged.
+
+For the information years, `make_shortlist_3b.py` exports the two helpers for all years, now that the shortlist is fixed. Its 2021-2023 values must equal the screening file.
+
+**If one passes:** a Forward Test on new days next to (v). For live trading, the script would also need Binance's perp premium data.
+
+Script: `stage3b_portfolio.py`. Results: `results/stage3b/portfolio_*`.
+
 ### Parked plans (2026-10-27, to run before trading real money)
 
 Each plan has a short name, so it can be started later by name.
