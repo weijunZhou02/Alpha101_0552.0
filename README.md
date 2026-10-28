@@ -69,6 +69,8 @@ mkdir -p data && cp ../A101_055-main/data/*.csv.gz data/
 | `drawdowns.py` | The two big after-cost drawdowns, month by month (writes `results/drawdowns/`) |
 | `make_candidates.py` | Exports the 126 stage 3 candidate alphas for 2021-2023 only (run with the main project's Python) |
 | `screen.py` | Stage 3 screen: can an existing alpha tell A101_055's good picks from bad ones? (writes `results/stage3/`) |
+| `make_shortlist_values.py` | Exports the two shortlisted helpers for all years (run with the main project's Python) |
+| `stage3_blend.py` | Stage 3 step 5: blends of A101_055 with the helpers, judged against (v) after costs (writes `results/stage3/blend_*`) |
 | `baseline/` | The original backtest's summary, daily results, a live list, and data checksums |
 | `results/` | Tables from each stage (kept in git) |
 
@@ -758,6 +760,39 @@ The screen covered 1,008 trade days (2021-03-29 to 2023-12-31). Files: `results/
 **Information only:** before-cost results, 7.5 bp, 2024-2026 and the bad windows. For these, `make_shortlist_values.py` exports the two helpers for all years, now that the shortlist is fixed. Its 2021-2023 values must equal the screening file.
 
 Script: `stage3_blend.py`. Results: `results/stage3/blend_*`.
+
+#### Stage 3, step 5 results (run 2026-10-28)
+
+`make_shortlist_values.py` exported the two helpers for all years. Its 2021-2023 values match the screening file (relative gap 5e-6).
+
+**Judged against (v), after costs (3.5 bp, funding included), 2021-03-29 to 2023-12-31**
+
+| | Sharpe after costs | (v) | vs (v), bp/day (t) | Years better | Sharpe before costs | Turnover | Verdict |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| (b1) + 0.3 Q158_MIN10 | 0.63 | 1.77 | −4.8 (−1.72) | 0 | 1.29 | 87% | fail |
+| (b2) + 0.3 GTJA_034 | 0.84 | 1.77 | −3.4 (−1.18) | 0 | 1.42 | 88% | fail |
+| (b3) + 0.2 each | 0.53 | 1.77 | −5.3 (−1.72) | 0 | 1.14 | 87% | fail |
+
+**No blend passes, so (v) stays the final version.** In the information years the blends were also worse: over 2024-2026 at 3.5 bp they made −7% to −16%, against +22% for (v).
+
+![Stage 3 blends against (v)](results/stage3/blend_after_costs.png)
+
+**Why: ranking skill is not money** (2021-2023, before costs, no scaling)
+
+| | Rank IC (t) | 16 long / 16 short, bp/day | Sharpe |
+| --- | --- | --- | --- |
+| A101_055 | 0.041 (10.6) | **+10.5** | **2.34** |
+| Q158_MIN10 | **0.094 (15.9)** | −1.5 | −0.19 |
+| GTJA_034 | 0.074 (11.6) | +2.6 | 0.32 |
+| Blend (b1) | 0.067 (15.1) | +7.3 | 1.29 |
+
+- **Q158_MIN10 ranks coins twice as well as A101_055 but makes no money with its own lists.**
+  - Its SHORT coins are wild (volatility rank 0.71).
+  - On a typical day they fall 110 bp against the market, which is why the rank IC is high.
+  - But their rare jumps (best 1% of days: +26%) cancel those falls on average (+0.2 bp).
+  - A101_055's shorts also fall on a typical day (−64 bp), and they keep it on average (−12.7 bp).
+- **Blending raised the rank IC but lowered the money.** It pulled the helpers' wild coins into A101_055's lists.
+- **Lesson for later screens:** the stage 3 shortlist rule used only rank IC. It should also have required money, for example the main project's rule of long-short t ≥ 3. That omission was a design mistake. Any future screen will include a money test.
 
 ### Parked plans (2026-10-27, to run before trading real money)
 
