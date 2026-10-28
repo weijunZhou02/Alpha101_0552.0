@@ -67,6 +67,8 @@ mkdir -p data && cp ../A101_055-main/data/*.csv.gz data/
 | `stage2.py` | Stage 2: trend guard, momentum book, holding longer, volatility scaling (writes `results/stage2/`) |
 | `after_costs_chart.py` | Today's version vs (v) after costs, and (v)'s position size (writes `results/stage2/after_costs.png`) |
 | `drawdowns.py` | The two big after-cost drawdowns, month by month (writes `results/drawdowns/`) |
+| `make_candidates.py` | Exports the 126 stage 3 candidate alphas for 2021-2023 only (run with the main project's Python) |
+| `screen.py` | Stage 3 screen: can an existing alpha tell A101_055's good picks from bad ones? (writes `results/stage3/`) |
 | `baseline/` | The original backtest's summary, daily results, a live list, and data checksums |
 | `results/` | Tables from each stage (kept in git) |
 
@@ -712,6 +714,30 @@ A helper "trend" or "reversal" score could help judge each kind of bet. It would
 **If nothing passes:** report "no existing alpha helps", and stop. Machine-learning meta-labeling is the next option, needing a separate approval.
 
 **Step 5** (the blend test of the shortlisted helpers) gets its own declaration and approval.
+
+#### Stage 3 screen results (run 2026-10-28)
+
+The screen covered 1,008 trade days (2021-03-29 to 2023-12-31). Files: `results/stage3/screen.csv` (all 126), `shortlist.csv`, `screen.png`.
+
+![Stage 3 screen](results/stage3/screen.png)
+
+**84 of the 126 candidates passed the rule.** The shortlist (the best one per family):
+
+| Helper | What it measures | Inside-picks IC (t) | 2021 / 2022 / 2023 | In reversal bets (t) | In continuation bets (t) | Corr with A101_055 | Corr with 14-day return |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| **Q158_MIN10** (filed under "Momentum / trend") | 10-day lowest low / close: high when the price sits near its 10-day low | 0.083 (11.4) | 0.097 / 0.078 / 0.079 | 12.5 | 5.2 | 0.14 | **−0.51** |
+| **GTJA_034** (short-term reversal) | 12-day average / close: high when the price is below its average | 0.063 (8.3) | 0.092 / 0.036 / 0.068 | 10.8 | 2.6 | 0.11 | **−0.69** |
+
+**What it shows**
+- **Both helpers fade the move. Neither follows the trend.**
+  - They favour coins sitting near recent lows, and they mark coins far above their lows as bad shorts.
+  - Most "Momentum / trend" alphas also become fade-the-move signals once the main project's 2021-2023 direction is applied, because short-horizon crypto moves mostly reversed in those years.
+  - **Only 1 of the 126 actually follows the 14-day trend** (Q158_MAX20). It has no skill inside the picks (t 0.6).
+  - **So no existing alpha gives a useful "keep going" score in 2021-2023.**
+- **Skill inside the picks mirrors general skill.** Across candidates, inside-picks t and all-80 t correlate 0.95. The screen mostly finds alphas that are strong in general, which is why 84 passed.
+  - Whether a helper adds anything to A101_055 is a separate question, answered only by the blend test (step 5).
+- **The helpers help most with A101_055's reversal bets** (t 12.5 and 10.8), and much less with its continuation bets (5.2 and 2.6).
+- **A warning for step 5:** both helpers push the strategy further toward "fade every move". That is exactly what failed in the bad windows, when moves kept going. Step 5 must show the bad windows as information.
 
 ### Parked plans (2026-10-27, to run before trading real money)
 
