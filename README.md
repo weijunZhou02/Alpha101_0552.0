@@ -78,6 +78,7 @@ mkdir -p data && cp ../A101_055-main/data/*.csv.gz data/
 | `view_from_2023h2.py` | Information view: the A2 versions from 2023-07-01, each restarted at $10,000 (writes `results/stage3b/from_2023h2.*`) |
 | `make_ml_inputs.py` | Exports the 158 broad-list alphas for all years for stage 4 (run with the main project's Python) |
 | `stage4_ml.py` | Stage 4: machine-learning re-ranker inside A101_055's candidates, trained walk-forward, judged against (v) (writes `results/stage4/`) |
+| `stage5_mix.py` | Stage 5: the three-signal mix (as traded on the demo) against (v), with a check against `mix_lists.py` (writes `results/stage5/`) |
 | `baseline/` | The original backtest's summary, daily results, a live list, and data checksums |
 | `results/` | Tables from each stage (kept in git) |
 
@@ -1150,6 +1151,65 @@ If both pass, the higher Sharpe after costs wins. If neither passes, (v) stays.
 **Honesty note:** because the mix was picked after seeing all years, even 2021-2023 is not a clean test for it. The demo account and the Forward Test are the real judges.
 
 Script: `stage5_mix.py`. Results: `results/stage5/`.
+
+#### Stage 5 results (run 2026-11-15)
+
+**Check passed:** on 30 sampled days, the lab's mix lists equal what `mix_lists.py`'s own functions give, 16 out of 16 on both sides.
+
+**Judged against (v), after costs (3.5 bp, funding included), 2021-03-29 to 2023-12-31**
+
+| | Sharpe | (v) | vs (v), bp/day (t) | Years better | Worst drawdown | Turnover | Verdict |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| (mix) as on the demo | 1.95 | 1.77 | +3.6 (0.83) | 1 of 3 | −12.4% | 57% | fail: t, years |
+| (mix-v) with (v)'s scaling | 2.10 | 1.77 | +5.2 (1.17) | 2 of 3 | −14.1% | 66% | fail: t |
+
+**By the rule, neither passes, so (v) stays the final version.** Both have a higher Sharpe in 2021-2023, but the daily gain over (v) is too noisy to count as proof (t 0.83 and 1.17; 2 is needed). The mix and (v) move almost independently (daily correlation 0.21), which makes the difference noisy.
+
+![Stage 5: the mix against (v)](results/stage5/mix_vs_v.png)
+
+**Information: the whole period, 2021-03-29 to 2026-10-24, per year**
+
+| | Before costs (no fees, no funding) | No fees, funding included | After costs, 3.5 bp | After costs, 7.5 bp | Sharpe at 3.5 bp | Worst drawdown at 3.5 bp | Worst day |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| (v) | +36.4% | +32.6% | +20.2% | +7.4% | 1.12 | −28.0% | −4.2% |
+| (a) | +34.5% | +29.1% | +16.8% | +4.1% | 0.84 | −30.1% | −4.9% |
+| **(mix)** | **+17.8%** | **+54.2%** | **+43.2%** | **+31.6%** | **1.47** | −32.9% | −7.7% |
+| (mix-v) | +20.7% | +48.9% | +38.7% | +27.9% | 1.55 | −26.9% | −6.1% |
+
+The "no fees, funding included" line is the earlier test's view. Here (mix) gets +54.2% and Sharpe 1.75 there, against +58.5% and 1.84 in the earlier test, which used different code and dates. (a) gets +29.1% against +30.5%.
+
+**Where the mix's money comes from** (simple yearly sums, % of the account)
+
+| Year | (mix) price | (mix) funding | (mix) total at 3.5 bp | (v) total at 3.5 bp |
+| --- | --- | --- | --- | --- |
+| 2021 | +67.7 | +8.1 | +96.9% | +43.5% |
+| 2022 | +28.3 | +11.0 | +33.5% | +23.1% |
+| 2023 | +9.3 | +18.7 | +21.2% | +29.2% |
+| 2024 | +21.9 | +9.5 | **+24.3%** | **−18.1%** |
+| 2025 | **−4.7** | +38.2 | +23.2% | +29.4% |
+| 2026 (to Oct 24) | **−11.5** | **+65.0** | +52.0% | +15.3% |
+
+**The bad windows, total return after costs (3.5 bp)**
+
+| | Box 1 | Box 2 | Dip 3 | Drawdown 1 | Drawdown 2 |
+| --- | --- | --- | --- | --- | --- |
+| (v) | −27.5% | −16.0% | −9.7% | −26.9% | −18.0% |
+| (mix) | **−6.0%** | −10.6% | −8.2% | **−6.8%** | **−8.8%** |
+
+But **before funding**, the mix lost more than (v) in Box 2 (−29.0% vs −10.4%) and in Drawdown 2 (−47.0% vs −4.7%). Funding income is what kept it level.
+
+**What it shows**
+- **The mix is a different strategy, not a better A101_055.**
+  - **On price alone it is weaker:** +17.8% a year before costs, against +36.4% for (v).
+  - **All of its lead comes from funding.** The funding rank makes it hold longs that are paid funding (crowded shorts), and the funding income grew from about +10% a year to +38% in 2025 and +65% in 2026.
+  - **Since 2025 its price part is negative:** the coins it holds lose on price, and the funding pays more than that.
+- **It trades less** (57% of the account a day, against 77%), so higher costs hurt it less: at 7.5 bp it still makes +31.6% a year, against +7.4% for (v).
+- **It escaped Box 1 and 2024**, where (v) lost 18%. That's mostly the 30-day momentum and the funding rank keeping it out of the runs that hurt A101_055.
+- **Bigger single-day losses:** worst day −7.7%, against −4.2% for (v).
+- **Not a clean test:** the mix was chosen in the earlier test after seeing all of these years, so the later years are not out-of-sample for it either.
+- **The main risk:** the mix depends on extreme negative funding continuing, a condition that only became common in 2025-2026. If it fades, the mix keeps a price part that has been negative since 2025.
+
+**Next:** the demo account (running the mix since 2026-11-03) and the Forward Test are the only fair judges. Watch the split between price and funding there, not just the total.
 
 ### Parked plans (2026-10-27, to run before trading real money)
 
