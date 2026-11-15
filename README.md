@@ -1201,10 +1201,10 @@ But **before funding**, the mix lost more than (v) in Box 2 (−29.0% vs −10.4
 **What it shows**
 - **The mix is a different strategy, not a better A101_055.**
   - **On price alone it is weaker:** +17.8% a year before costs, against +36.4% for (v).
-  - **All of its lead comes from funding.** The funding rank makes it hold longs that are paid funding (crowded shorts), and the funding income grew from about +10% a year to +38% in 2025 and +65% in 2026.
+  - **All of its lead comes from funding.** The funding rank makes it buy coins whose funding is negative and short coins whose funding is high, so both sides tend to collect funding. That income grew from about +10% a year to +38% in 2025 and +65% in 2026.
   - **Since 2025 its price part is negative:** the coins it holds lose on price, and the funding pays more than that.
 - **It trades less** (57% of the account a day, against 77%), so higher costs hurt it less: at 7.5 bp it still makes +31.6% a year, against +7.4% for (v).
-- **It escaped Box 1 and 2024**, where (v) lost 18%. That's mostly the 30-day momentum and the funding rank keeping it out of the runs that hurt A101_055.
+- **It escaped Box 1 and 2024**, where (v) lost 18%. A likely reason (not tested here) is that the momentum and funding ranks kept it out of the runs that hurt A101_055.
 - **Bigger single-day losses:** worst day −7.7%, against −4.2% for (v).
 - **Not a clean test:** the mix was chosen in the earlier test after seeing all of these years, so the later years are not out-of-sample for it either.
 - **The main risk:** the mix depends on extreme negative funding continuing, a condition that only became common in 2025-2026. If it fades, the mix keeps a price part that has been negative since 2025.
