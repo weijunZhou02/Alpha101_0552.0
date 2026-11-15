@@ -1108,6 +1108,49 @@ The owner asked to see the versions from mid-2023 onwards. `view_from_2023h2.py`
 - **The bad windows weren't fixed.** (R30) lost less in Box 2 and Drawdown 2, but it gave that back in 2026 (−12.1% against +15.3% for (v)), and it fails Gate 1. Information only.
 - **Together with stages 1, 2, 3 and 3b:** filters, guards, blends, helper alphas and now machine-learning re-rankers all fail to improve on A101_055's own lists in a way that holds up. The differences between candidates inside those lists look mostly like noise.
 
+### Stage 5: the three-signal mix under the lab's rules (declared 2026-11-15)
+
+**Background.** Since 2026-11-03 the demo account trades the **three-signal mix** (`mix_lists.py` in `A101_055-main`).
+- It was found on 2026-11-02/03 in a separate chat, on copies of the owner's `test.py`: fees ignored, +58.5% a year, Sharpe 1.84, against +30.5% and 1.37 for A101_055 alone. It was never recorded here.
+- That test chose the mix after trying more than 80 variations and seeing all years, so it was not clean.
+- Most of its profit after 2024 came from funding.
+
+This stage rebuilds it with the lab's own accounting and judges it against (v), using Binance costs.
+
+**The mix, exactly as `mix_lists.py` builds it**
+- Inside the day's 80-coin universe, take three percentile ranks (0 to 1):
+  - A101_055;
+  - minus the funding paid over the last 7 days (needs at least 3 days with a payment);
+  - the 30-day return.
+- The mix score is their average. A coin with any rank missing gets no score.
+- BUY the 16 highest scores and SHORT the 16 lowest. Ties go to the alphabetically first coin.
+- If fewer than 32 coins have a score, there are no lists that day.
+- Equal money per coin, 50% per side.
+
+**Check before judging:** on 30 sampled days the lab's lists must equal what `mix_lists.py`'s own functions give on the same data.
+
+**Versions**
+- (mix): the mix as traded on the demo, with no volatility scaling.
+- (mix-v): the mix with (v)'s volatility scaling, computed from its own unscaled results.
+
+**Yardstick:** (v), the working version. (a), today's A101_055, is shown as information.
+
+**Rule A, after costs.** 3.5 bp per dollar traded, funding included, trade days 2021-03-29 to 2023-12-31. To pass, a version needs all three:
+- a higher Sharpe than (v);
+- t ≥ 2 on the day-by-day difference;
+- a higher Sharpe than (v) in at least 2 of 2021, 2022 and 2023.
+
+If both pass, the higher Sharpe after costs wins. If neither passes, (v) stays.
+
+**Information only**
+- Before costs (no fees, no funding); no fees with funding included (to compare with the earlier +58.5%); 7.5 bp.
+- 2024, 2025-26 and the bad windows.
+- Yearly returns split into price and funding, turnover, worst day and drawdown, and the daily correlation with (v).
+
+**Honesty note:** because the mix was picked after seeing all years, even 2021-2023 is not a clean test for it. The demo account and the Forward Test are the real judges.
+
+Script: `stage5_mix.py`. Results: `results/stage5/`.
+
 ### Parked plans (2026-10-27, to run before trading real money)
 
 Each plan has a short name, so it can be started later by name.
