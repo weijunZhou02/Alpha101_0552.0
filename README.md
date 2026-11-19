@@ -79,6 +79,9 @@ mkdir -p data && cp ../A101_055-main/data/*.csv.gz data/
 | `make_ml_inputs.py` | Exports the 158 broad-list alphas for all years for stage 4 (run with the main project's Python) |
 | `stage4_ml.py` | Stage 4: machine-learning re-ranker inside A101_055's candidates, trained walk-forward, judged against (v) (writes `results/stage4/`) |
 | `stage5_mix.py` | Stage 5: the three-signal mix (as traded on the demo) against (v), with a check against `mix_lists.py` (writes `results/stage5/`) |
+| `get_hourly.py` | Stage 6: downloads hourly candles for the coins the mix held, only for those months (writes `data_hourly/`, not in git) |
+| `stage6_timing.py` | Stage 6: sell earlier in the day, 5 selling hours against holding 24 hours (writes `results/stage6/`) |
+| `stage6_demo.py` | Stage 6 demo look: the same versions on the demo's real positions, from public demo-market data with no keys (writes `results/stage6/demo_*.csv`) |
 | `baseline/` | The original backtest's summary, daily results, a live list, and data checksums |
 | `results/` | Tables from each stage (kept in git) |
 
@@ -1259,6 +1262,88 @@ If several pass, the highest Sharpe wins. If none passes, (h24) stays and nothin
 **Data.** `get_hourly.py` downloads Binance's public monthly hourly candle files (data.binance.vision) for every coin in the (mix) lists, only for the months it is held, into `data_hourly/` (not in git). Funding times are already in `data/funding.csv.gz`.
 
 Scripts: `get_hourly.py`, `stage6_timing.py`, `stage6_demo.py`. Results: `results/stage6/`.
+
+#### Stage 6 results (run 2026-11-19)
+
+**Data:** 6,355 coin-months of hourly candles (520 coins), none missing.
+
+**Check passed:** (h24) rebuilt from hourly candles equals stage 5's (mix). The average daily gap is 0.0000 bp, and the Sharpe for 2021-2023 is 1.951 both ways. Of 65,152 held coin-days, at most 4 had no candle at the selling hour (the hour before was used), and none had no candle at all.
+
+**Judged against (h24), after costs (3.5 bp, funding included), 2021-03-29 to 2023-12-31**
+
+| | Sharpe | (h24) | vs (h24), bp/day (t) | Years better | Worst drawdown | Turnover | Verdict |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| (h4) sell at 04:00 | −2.53 | 1.95 | −17.9 (−5.18) | 0 of 3 | −50.1% | 200% | fail |
+| (h8) sell at 08:00 | −1.12 | 1.95 | −15.6 (−4.87) | 0 of 3 | −39.7% | 200% | fail |
+| (h12) sell at 12:00 | −0.76 | 1.95 | −14.9 (−5.14) | 0 of 3 | −44.1% | 200% | fail |
+| (h16) sell at 16:00 | 0.01 | 1.95 | −12.2 (−5.03) | 0 of 3 | −36.4% | 200% | fail |
+| (h20) sell at 20:00 | 0.36 | 1.95 | −10.4 (−5.33) | 0 of 3 | −27.1% | 200% | fail |
+
+**By the rule, none passes, so (h24) stays: hold 24 hours, and nothing changes.** It is not a near miss. Every early version is clearly worse (t about −5), and worse in each of 2021, 2022 and 2023.
+
+![Stage 6: sell earlier in the day](results/stage6/timing.png)
+
+**Why, in bp a day, 2021-2023**
+
+| | Price | Funding | Fees at 3.5 bp | Net |
+| --- | --- | --- | --- | --- |
+| (h24) | +10.5 | +3.7 | −2.0 | **+12.2** |
+| (h4) | +1.2 | +0.1 | −7.0 | −5.7 |
+| (h8) | +2.3 | +1.3 | −7.0 | −3.4 |
+| (h12) | +2.9 | +1.4 | −7.0 | −2.7 |
+| (h16) | +4.5 | +2.6 | −7.0 | +0.0 |
+| (h20) | +6.1 | +2.7 | −7.0 | +1.8 |
+
+Three things point the same way:
+1. **Fees.** Selling everything and buying it all back trades 200% of the account a day, against 57%. That is 5 bp a day more (about 18% a year).
+2. **Price.** In 2021-2023 the mix made 41% of its daily price gain in the last 4 hours (+4.3 of +10.5 bp). Selling earlier gives that up.
+3. **Funding.** Every early version misses the 00:00 payment, and the earliest ones also miss 08:00 and 16:00.
+
+**Information: the whole period, 2021-03-29 to 2026-10-24, per year**
+
+| | After costs, 3.5 bp | After costs, 7.5 bp | No fees, funding included | Sharpe at 3.5 bp |
+| --- | --- | --- | --- | --- |
+| **(h24)** | **+43.2%** | **+31.6%** | **+54.2%** | **1.47** |
+| (h4) | −22.9% | −42.5% | −0.5% | −2.41 |
+| (h8) | −12.1% | −34.4% | +13.5% | −0.78 |
+| (h12) | −2.7% | −27.4% | +25.6% | −0.06 |
+| (h16) | +3.8% | −22.5% | +34.0% | 0.28 |
+| (h20) | +7.5% | −19.7% | +38.8% | 0.42 |
+
+**Information: the average path through the day** (price + funding since 00:00, before fees, bp of the account)
+
+| Hour (UTC) | 04:00 | 08:00 | 12:00 | 16:00 | 20:00 | 24:00 |
+| --- | --- | --- | --- | --- | --- | --- |
+| 2021-2023 | +1.3 | +3.6 | +4.3 | +7.0 | +8.8 | +14.2 |
+| 2024 | −2.8 | +0.7 | +6.5 | +4.8 | +4.3 | +8.6 |
+| 2025-26 | −0.5 | +5.6 | +10.4 | +13.3 | +14.4 | +13.2 |
+
+**Information: 2025-26 looks different, but it does not change the verdict.**
+- In 2025-26 the last 4 hours lost 3.7 bp a day on price, while 2021-2023 and 2024 earned +4.3 and +3.8 there.
+- So before fees, selling at 20:00 would have done better in 2025-26: +60.0% a year against +52.4% (no fees, funding included).
+- After fees it still did worse: +24.0% against +41.3% at 3.5 bp. The 5 bp a day of extra fees and the 2.5 bp of funding missed are more than the 3.7 bp saved.
+- By rule 1, 2025-26 cannot choose anything. The earlier years show the opposite pattern, so this is not a stable feature.
+
+**The demo look (information only): 15 trade days, 2026-11-04 to 2026-11-18**
+
+Check: the rebuilt funding equals the demo's real funding ($9.09 both). The (h24) rebuild made +$217, against the demo's real +$180. The daily correlation is 0.996, and the average daily gap is $4.33. The gap is all price: the rebuild buys at the 00:00 price, while the demo buys around 00:05 at its real fills.
+
+| | Net | Price | Funding | Fees | vs (h24), bp/day (t) |
+| --- | --- | --- | --- | --- | --- |
+| (h24) | +$217 | +$226 | +$9 | −$18 | |
+| (h4) | +$342 | +$404 | −$5 | −$57 | +15.8 (0.66) |
+| (h8) | +$183 | +$237 | +$3 | −$57 | −5.4 (−0.25) |
+| (h12) | +$233 | +$293 | −$3 | −$57 | +1.7 (0.06) |
+| (h16) | +$155 | +$206 | +$6 | −$57 | −8.3 (−0.57) |
+| (h20) | +$249 | +$306 | −$0.4 | −$57 | +4.2 (0.51) |
+
+Fees use the demo's own average, 4.43 bp per dollar traded. **On these 15 days, selling at 04:00 would have made the most, yet over 5.5 years it is the worst version.** Every gap here is below t 1. This is why a few weeks of watching cannot pick an hour.
+
+**What it shows**
+- Holding 24 hours is clearly best. Every early version loses to it in every judged year.
+- The fees alone sink the idea: selling early needs about 5 bp a day more profit just to break even, and no hour gives that.
+- No Forward Test is needed, and the program does not change.
+- Moving the whole run to another hour, or selling only part of the book, would be new guesses. Each would need its own declaration, chosen on 2021-2023.
 
 ### Parked plans (2026-10-27, to run before trading real money)
 
