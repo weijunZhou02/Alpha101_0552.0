@@ -1211,6 +1211,55 @@ But **before funding**, the mix lost more than (v) in Box 2 (−29.0% vs −10.4
 
 **Next:** the demo account (running the mix since 2026-11-03) and the Forward Test are the only fair judges. Watch the split between price and funding there, not just the total.
 
+### Stage 6: sell earlier in the day (declared 2026-11-19)
+
+**Background.** The demo buys the mix at 00:05 UTC and holds it for 24 hours, until the next run. The owner asked whether selling earlier in the day could earn more. The idea came from watching the demo, so by rule 7 it is a guess: the hours below are fixed before any result is seen.
+
+**Known before running: two things work against selling early.**
+- **Fees.** Holding 24 hours trades only the coins that change (57% of the account a day in stage 5). Selling everything and buying it all back the next day trades about 200% a day.
+- **Funding.** Most coins pay funding at 00:00, 08:00 and 16:00 UTC (some every 4 hours or every hour), and only to whoever holds at that moment. Stage 5 found that all of the mix's lead comes from funding.
+
+**Versions.** All trade the (mix) lists from stage 5, as on the demo, with no volatility scaling. All buy at 00:00 UTC.
+- (h24): hold 24 hours, today's way. This is the yardstick.
+- (h4), (h8), (h12), (h16), (h20): sell everything at 04:00, 08:00, 12:00, 16:00 or 20:00 UTC, then hold nothing until the next 00:00.
+- Live, these would sell at 04:05, 08:05 and so on, just after the funding times. The backtest uses the price at the full hour and counts the payment made at that hour.
+
+**Accounting**
+- Prices come from hourly candles. The buy price is the 00:00 price, as in stage 5. The sell price is the close of the hour that ends at the selling time.
+- If a held coin has no hourly candle at the selling time, the last hourly close before it is used. How often this happens is reported.
+- Funding: each payment at its exact time, counted only if the coin is held at that moment, so payments after 00:00 and up to the selling time. For (h24) this is up to the next 00:00, exactly as in stage 5.
+- Fees: (h24) as in stage 5 (only the changes; weights drift with prices). The early versions buy the whole book at 00:00 and sell the whole book at the selling time.
+
+**Check before judging.** (h24) rebuilt from hourly candles must give the same daily results as stage 5's (mix): average daily difference under 0.1 bp and the same Sharpe to 2 decimals. If not, the cause is found and fixed before anything is judged.
+
+**Judged after costs.** 3.5 bp per dollar traded, funding included, trade days 2021-03-29 to 2023-12-31. Each early version is compared with (h24) and needs both:
+- a higher Sharpe than (h24);
+- t ≥ 2 on the day-by-day difference.
+
+If several pass, the highest Sharpe wins. If none passes, (h24) stays and nothing changes. "Better in 2 of 3 years" is shown but not required: the owner approved rule 3 as written above.
+
+**Information only**
+- 7.5 bp and before costs; 2024 and 2025-01-01 to 2026-10-24; years better in 2021-2023.
+- Each version's price part, funding part and fees.
+- The average path through the day: the mix's price and funding income, hour by hour after 00:00, by period. It shows where in the day the money is made. **An hour picked from this curve would be a new guess**: it would need its own declaration and new days.
+
+**The demo look (information only).** The same 6 versions on the demo's 15 full trade days, 2026-11-04 to 2026-11-18. (The first day started at 13:15 on 2026-11-03 and is left out.)
+- Positions: the demo's real positions, rebuilt from its orders (`A101_055-main/demo/orders.csv`, read only).
+- Prices and funding: the demo market's public hourly candles and funding history. No API keys are used.
+- Fees: the demo's own average fee per dollar traded, from its orders.
+- Check: the (h24) rebuild is compared with the demo's real daily results (`ledger.csv`), and the gap is reported.
+- 15 days cannot prove anything; even the demo's own profit so far has t 0.84.
+
+**If a version passes: Forward Test.** It is scored on every new demo day as a shadow: worked out from the demo's real positions and public hourly prices, with no second account and no change to the program. A check after 90 trade days can only catch a disaster. The program changes only if the version also passes there.
+
+**Honesty notes**
+- With 5 tries, the chance that at least one passes by luck is higher than for one try.
+- The mix itself was picked after seeing all years (stage 5), so 2021-2023 is not fully clean for it either.
+
+**Data.** `get_hourly.py` downloads Binance's public monthly hourly candle files (data.binance.vision) for every coin in the (mix) lists, only for the months it is held, into `data_hourly/` (not in git). Funding times are already in `data/funding.csv.gz`.
+
+Scripts: `get_hourly.py`, `stage6_timing.py`, `stage6_demo.py`. Results: `results/stage6/`.
+
 ### Parked plans (2026-10-27, to run before trading real money)
 
 Each plan has a short name, so it can be started later by name.

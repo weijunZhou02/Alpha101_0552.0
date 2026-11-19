@@ -6,6 +6,7 @@ __pycache__/
 # frozen data snapshot (27 MB, checksums in baseline/data_sha256.txt) and fresh data
 data/
 data_fresh/
+data_hourly/
 # experiment output (rebuilt by the scripts)
 out/
 # daily list files a101_055.py writes in the current folder
